@@ -9,36 +9,35 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.JwtStrategy = void 0;
+exports.RefreshTokenStrategy = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 const passport_jwt_1 = require("passport-jwt");
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const config_1 = require("@nestjs/config");
-let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt') {
+let RefreshTokenStrategy = class RefreshTokenStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-refresh') {
     prisma;
     configService;
     constructor(prisma, configService) {
         super({
-            jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
-            secretOrKey: configService.get('JWT_SECRET'),
+            jwtFromRequest: passport_jwt_1.ExtractJwt.fromExtractors([
+                (req) => req?.cookies?.refreshToken
+            ]),
+            secretOrKey: configService.get('JWT_REFRESH_SECRET'),
         });
         this.prisma = prisma;
         this.configService = configService;
     }
     async validate(payload) {
-        const user = await this.prisma.users.findUnique({
-            where: { id: payload.id },
-        });
-        if (!user) {
-            throw new Error('Invalid token');
-        }
+        const user = await this.prisma.users.findUnique({ where: { id: payload.id } });
+        if (!user)
+            throw new Error('User not found');
         return { id: user.id, role: user.role };
     }
 };
-exports.JwtStrategy = JwtStrategy;
-exports.JwtStrategy = JwtStrategy = __decorate([
+exports.RefreshTokenStrategy = RefreshTokenStrategy;
+exports.RefreshTokenStrategy = RefreshTokenStrategy = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService, config_1.ConfigService])
-], JwtStrategy);
-//# sourceMappingURL=jwt.strategy.js.map
+], RefreshTokenStrategy);
+//# sourceMappingURL=refresh-token.strategy.js.map

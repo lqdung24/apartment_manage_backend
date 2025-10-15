@@ -1,16 +1,21 @@
-import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
-import {PrismaService} from "../../shared/prisma/prisma.service";
-import {RegisterDto} from "./dto/register.dto";
-import {Role} from "@prisma/client";
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { SignUpDto } from './dto/sign-up.dto';
+import { Role } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import {LoginDto} from "./dto/login.dto";
+import { SignInDto } from './dto/sign-in.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService, private configService: ConfigService) {}
 
-  async register(dto: RegisterDto) {
+  async signup(dto: SignUpDto) {
     const exist = await this.prisma.users.findFirst({
       where: { OR: [{ email: dto.email }, { username: dto.username }] },
     });
@@ -21,24 +26,60 @@ export class AuthService {
       data: { ...dto, password: hashed, role: Role.USER },
     });
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, {
-      expiresIn: '1d',
-    });
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      this.configService.get<string>('JWT_SECRET')!,
+      {
+        expiresIn: '15m',
+      },
+    );
 
-    return { user, token };
+    const refreshToken = jwt.sign(
+      { id: user.id }, 
+      this.configService.get<string>('JWT_REFRESH_SECRET')!, 
+      {
+        expiresIn: '1d',
+      }
+    );
+
+    return { user, accessToken, refreshToken };
   }
 
-  async login(dto: LoginDto) {
-    const user = await this.prisma.users.findUnique({ where: { email: dto.email } });
+  async signin(dto: SignInDto) {
+    const user = await this.prisma.users.findUnique({
+      where: { email: dto.email },
+    });
     if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    const match = await bcrypt.compare(dto.password, user.password);
+    const match: Boolean = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Invalid credentials');
 
-    const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET!, {
-      expiresIn: '1d',
-    });
+    const accessToken = jwt.sign(
+      { id: user.id, role: user.role },
+      this.configService.get<string>('JWT_SECRET')!,
+      {
+        expiresIn: '15m',
+      },
+    );
 
-    return { user, token };
+    const refreshToken = jwt.sign(
+      { id: user.id }, 
+      this.configService.get<string>('JWT_REFRESH_SECRET')!, 
+      {
+        expiresIn: '1d',
+      }
+    );
+
+    return { user, accessToken, refreshToken };
+  }
+
+  async refresh(user: {id: number; role: string}){
+    const accessToken = jwt.sign(
+      {id: user.id, role: user.role},
+      this.configService.get<string>('JWT_SECRET')!,
+      { expiresIn: '15m' }
+    )
+
+    return { accessToken };
   }
 }

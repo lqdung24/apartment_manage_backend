@@ -1,10 +1,10 @@
 import { AuthService } from './auth.service';
-import { RegisterDto } from "./dto/register.dto";
-import { LoginDto } from "./dto/login.dto";
+import { SignUpDto } from './dto/sign-up.dto';
+import { SignInDto } from './dto/sign-in.dto';
 export declare class AuthController {
     private readonly authService;
     constructor(authService: AuthService);
-    register(dto: RegisterDto): Promise<{
+    signup(dto: SignUpDto): Promise<{
         user: {
             username: string;
             email: string;
@@ -13,9 +13,10 @@ export declare class AuthController {
             id: number;
             createtime: Date;
         };
-        token: string;
+        accessToken: string;
+        refreshToken: string;
     }>;
-    login(dto: LoginDto): Promise<{
+    signin(dto: SignInDto): Promise<{
         user: {
             username: string;
             email: string;
@@ -24,6 +25,10 @@ export declare class AuthController {
             id: number;
             createtime: Date;
         };
-        token: string;
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    refresh(req: any): Promise<{
+        accessToken: string;
     }>;
 }

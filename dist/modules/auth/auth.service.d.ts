@@ -1,10 +1,12 @@
-import { PrismaService } from "../../shared/prisma/prisma.service";
-import { RegisterDto } from "./dto/register.dto";
-import { LoginDto } from "./dto/login.dto";
+import { PrismaService } from '../../shared/prisma/prisma.service';
+import { SignUpDto } from './dto/sign-up.dto';
+import { SignInDto } from './dto/sign-in.dto';
+import { ConfigService } from '@nestjs/config';
 export declare class AuthService {
     private prisma;
-    constructor(prisma: PrismaService);
-    register(dto: RegisterDto): Promise<{
+    private configService;
+    constructor(prisma: PrismaService, configService: ConfigService);
+    signup(dto: SignUpDto): Promise<{
         user: {
             username: string;
             email: string;
@@ -13,9 +15,10 @@ export declare class AuthService {
             id: number;
             createtime: Date;
         };
-        token: string;
+        accessToken: string;
+        refreshToken: string;
     }>;
-    login(dto: LoginDto): Promise<{
+    signin(dto: SignInDto): Promise<{
         user: {
             username: string;
             email: string;
@@ -24,6 +27,13 @@ export declare class AuthService {
             id: number;
             createtime: Date;
         };
-        token: string;
+        accessToken: string;
+        refreshToken: string;
+    }>;
+    refresh(user: {
+        id: number;
+        role: string;
+    }): Promise<{
+        accessToken: string;
     }>;
 }

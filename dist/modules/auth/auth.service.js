@@ -48,12 +48,15 @@ const jwt = __importStar(require("jsonwebtoken"));
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
+const config_1 = require("@nestjs/config");
 let AuthService = class AuthService {
     prisma;
-    constructor(prisma) {
+    configService;
+    constructor(prisma, configService) {
         this.prisma = prisma;
+        this.configService = configService;
     }
-    async register(dto) {
+    async signup(dto) {
         const exist = await this.prisma.users.findFirst({
             where: { OR: [{ email: dto.email }, { username: dto.username }] },
         });
@@ -63,27 +66,39 @@ let AuthService = class AuthService {
         const user = await this.prisma.users.create({
             data: { ...dto, password: hashed, role: client_1.Role.USER },
         });
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+        const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), {
+            expiresIn: '15m',
+        });
+        const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
             expiresIn: '1d',
         });
-        return { user, token };
+        return { user, accessToken, refreshToken };
     }
-    async login(dto) {
-        const user = await this.prisma.users.findUnique({ where: { email: dto.email } });
+    async signin(dto) {
+        const user = await this.prisma.users.findUnique({
+            where: { email: dto.email },
+        });
         if (!user)
             throw new common_1.UnauthorizedException('Invalid credentials');
         const match = await bcrypt.compare(dto.password, user.password);
         if (!match)
             throw new common_1.UnauthorizedException('Invalid credentials');
-        const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, {
+        const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), {
+            expiresIn: '15m',
+        });
+        const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
             expiresIn: '1d',
         });
-        return { user, token };
+        return { user, accessToken, refreshToken };
+    }
+    async refresh(user) {
+        const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), { expiresIn: '15m' });
+        return { accessToken };
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService, config_1.ConfigService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

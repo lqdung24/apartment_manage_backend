@@ -42,7 +42,7 @@ project-root/
     │   ├── prisma/
     │   │   └── prisma.service.ts   # PrismaService singleton
     │   ├── mailer/                 # MailService
-│   │   └── logger/                 # LoggerService
+    │   └── logger/                 # LoggerService
     │
     └── modules/                # các module chính
         ├── auth/
