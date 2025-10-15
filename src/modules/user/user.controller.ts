@@ -1,7 +1,12 @@
-import {Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe} from '@nestjs/common';
+import {Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe, UseGuards} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import {UpdateUserRoleDto} from "./dto/update-user-role.dto";
+import {AuthGuard} from "@nestjs/passport";
+import {RolesGuard} from "../../common/guards/roles.guard";
+import {Roles} from "../../common/decorators/roles.decorater";
+import {Role} from "@prisma/client";
 
 @Controller('user')
 export class UserController {
@@ -30,5 +35,12 @@ export class UserController {
   @Delete(':id')
   removeById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.removeById(id);
+  }
+
+  @Patch(':id/role')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  updateRole(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserRoleDto){
+    return this.userService.updateRole(id, dto)
   }
 }

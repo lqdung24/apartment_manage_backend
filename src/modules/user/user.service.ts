@@ -1,8 +1,9 @@
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {ConflictException, Injectable, NotFoundException, Patch} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import {Role} from "@prisma/client";
+import {UpdateUserRoleDto} from "./dto/update-user-role.dto";
 
 @Injectable()
 export class UserService {
@@ -58,5 +59,17 @@ export class UserService {
   removeById(id: number) {
     this.prisma.users.findFirstOrThrow({where: {id}})
     return this.prisma.users.delete({where: {id}})
+  }
+
+  async updateRole(id: number, dto: UpdateUserRoleDto){
+    const user = await this.prisma.users.findFirst({
+      where: { id }
+    })
+    if(!user) throw new NotFoundException('User not found')
+
+    return this.prisma.users.update({
+      where: { id },
+      data: {role: dto.role}
+    })
   }
 }

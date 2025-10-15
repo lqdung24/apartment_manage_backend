@@ -1,6 +1,7 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { PrismaService } from "../../shared/prisma/prisma.service";
+import { UpdateUserRoleDto } from "./dto/update-user-role.dto";
 export declare class UserService {
     private readonly prisma;
     constructor(prisma: PrismaService);
@@ -8,7 +9,7 @@ export declare class UserService {
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role | null;
+        role: import("@prisma/client").$Enums.Role;
         id: number;
         createtime: Date;
     }>;
@@ -16,7 +17,7 @@ export declare class UserService {
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role | null;
+        role: import("@prisma/client").$Enums.Role;
         id: number;
         createtime: Date;
     }[]>;
@@ -24,7 +25,7 @@ export declare class UserService {
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role | null;
+        role: import("@prisma/client").$Enums.Role;
         id: number;
         createtime: Date;
     }>;
@@ -32,7 +33,7 @@ export declare class UserService {
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role | null;
+        role: import("@prisma/client").$Enums.Role;
         id: number;
         createtime: Date;
     }>;
@@ -40,8 +41,16 @@ export declare class UserService {
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role | null;
+        role: import("@prisma/client").$Enums.Role;
         id: number;
         createtime: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
+    updateRole(id: number, dto: UpdateUserRoleDto): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        id: number;
+        createtime: Date;
+    }>;
 }

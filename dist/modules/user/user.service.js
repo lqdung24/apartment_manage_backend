@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.UserService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
+const client_1 = require("@prisma/client");
 let UserService = class UserService {
     prisma;
     constructor(prisma) {
@@ -32,6 +33,7 @@ let UserService = class UserService {
             if (existingUser.email === data.email)
                 throw new common_1.ConflictException('Email already exits');
         }
+        data.role = client_1.Role.USER;
         return this.prisma.users.create({ data });
     }
     async findAll() {
@@ -54,12 +56,25 @@ let UserService = class UserService {
                     NOT: { id },
                 },
             });
+            if (conflictUser)
+                throw new common_1.ConflictException("Email or username adreadly exist");
         }
         return this.prisma.users.update({ where: { id }, data });
     }
     removeById(id) {
         this.prisma.users.findFirstOrThrow({ where: { id } });
         return this.prisma.users.delete({ where: { id } });
+    }
+    async updateRole(id, dto) {
+        const user = await this.prisma.users.findFirst({
+            where: { id }
+        });
+        if (!user)
+            throw new common_1.NotFoundException('User not found');
+        return this.prisma.users.update({
+            where: { id },
+            data: { role: dto.role }
+        });
     }
 };
 exports.UserService = UserService;
