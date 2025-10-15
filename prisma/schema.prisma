@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  // output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Users {
+  id         Int         @id @default(autoincrement())
+  username   String      @unique
+  email      String      @unique
+  password   String
+  role       Role
+  createtime DateTime    @default(now())
+  HouseHolds HouseHolds? @relation("account") // tài khoản của hộ gia đình
+}
+
+enum Role {
+  USER
+  ADMIN
+  ACCOUNTANT
+}
+
+model HouseHolds {
+  id              Int             @id @default(autoincrement())
+  houseHoldCode   Int             @unique // số hộ khẩu
+  apartmentNumber String          @unique // số căn hộ
+  buildingNumber  String? // Số nhà
+  street          String? // Tên đường / ngõ
+  ward            String? // Xã / Phường
+  province        String? // Tỉnh / Thành phố
+  status          HouseHoldStatus
+  createtime      DateTime        @default(now())
+  headID          Int             @unique // id chủ hộ
+  head            Resident        @relation("headOfHouse", fields: [headID], references: [id])
+  resident        Resident[]      @relation("houseMembers") // nhân khẩu trong 1 hộ
+  userID          Int             @unique
+  account         Users           @relation("account", fields: [userID], references: [id]) // một hộ có 1 tài khoản
+
+  FeeAssignment FeeAssignment[]
+}
+
+enum HouseHoldStatus {
+  ACTIVE
+  MOVED
+  DELETE
+}
+
+model Resident {
+  id                 Int                @id @default(autoincrement())
+  nationalId         String             @unique // cccd
+  phoneNumber        String
+  email              String
+  idCardIssueDate    DateTime?
+  fullname           String
+  dateOfBirth        DateTime?
+  gender             Gender?
+  relationshipToHead RelationshipToHead // quan hệ với chủ hộ
+  placeOfOrigin      String? // Quê quán
+  occupation         String? // Nghề nghiệp
+  workingAdress      String? // noi lam viec
+  houseHoldId        Int? // hộ khẩu
+  residencStatus     ResidenceStatus    @default(NORMAL)
+  houseHold          HouseHolds?        @relation("houseMembers", fields: [houseHoldId], references: [id])
+  headedHouse        HouseHolds?        @relation("headOfHouse")
+
+  TemporaryResidence TemporaryResidence[] @relation("tempResidence")
+  TemporaryAbsence   TemporaryAbsence[]   @relation("tempAbsence")
+}
+
+enum ResidenceStatus {
+  NORMAL
+  TEMP_ABSENT
+  MOVE_OUT
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum RelationshipToHead {
+  HEAD
+  WIFE
+  HUSBAND
+  SON
+  DAUGHTER
+  FATHER
+  MOTHER
+  OTHER
+}
+
+model TemporaryResidence {
+  id         Int      @id @default(autoincrement())
+  residentId Int
+  resident   Resident @relation("tempResidence", fields: [residentId], references: [id])
+
+  startDate DateTime
+  endDate   DateTime?
+  reason    String?
+  address   String // Địa chỉ tạm trú (nếu khác nơi thường trú)
+}
+
+model TemporaryAbsence {
+  id         Int      @id @default(autoincrement())
+  residentId Int
+  resident   Resident @relation("tempAbsence", fields: [residentId], references: [id])
+
+  startDate   DateTime
+  endDate     DateTime?
+  reason      String?
+  destination String? // Nơi đến tạm vắng
+}
+
+enum FeeType {
+  MANDATORY // Thu bắt buộc
+  VOLUNTARY // Đóng góp tự nguyện
+}
+
+enum FeeFrequency {
+  ONE_TIME // Không định kỳ
+  MONTHLY // Hàng tháng
+  YEARLY // Hàng năm
+}
+
+model Fee {
+  id            Int          @id @default(autoincrement())
+  name          String
+  description   String?
+  type          FeeType
+  frequency     FeeFrequency
+  ratePerPerson Float? // Mức phí mỗi nhân khẩu
+  minium        Float?      @default(0)
+  startDate     DateTime?
+  endDate       DateTime?
+  createdAt     DateTime     @default(now())
+
+  assignments FeeAssignment[]
+}
+
+model FeeAssignment {
+  id          Int      @id @default(autoincrement())
+  feeId       Int
+  householdId Int
+  amountDue   Float // Số tiền phải nộp = nhân khẩu × đơn giá
+  dueDate     DateTime
+  isPaid      Boolean  @default(false)
+
+  fee       Fee        @relation(fields: [feeId], references: [id])
+  household HouseHolds @relation(fields: [householdId], references: [id])
+
+  payments Payment? @relation("feePayment")
+}
+
+model Payment {
+  id              Int      @id @default(autoincrement())
+  feeAssignmentId Int @unique
+  amountPaid      Float
+  paidDate        DateTime @default(now())
+  note            String?
+
+  feeAssignment FeeAssignment @relation("feePayment" ,fields: [feeAssignmentId], references: [id])
+}
