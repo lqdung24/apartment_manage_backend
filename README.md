@@ -32,11 +32,17 @@ project-root/
     │
     ├── config/                 # cấu hình ứng dụng
     │
-    ├── common/                 # code dùng chung, không thuộc module cụ thể
+    ├── common/                  # code dùng chung, không thuộc module cụ thể
+    │   ├── guards/              # RolesGuard, AuthGuard
+    │   ├── decorators/          # @Roles(), @CurrentUser()
+    │   ├── pipes/               # ParseIntPipe, ValidationPipe custom
+    │   └── filters/             # ExceptionFilter, PrismaExceptionFilter
     │
-    ├── shared/                 # code tái sử dụng trong nhiều module
-    │   └── prisma/
-    │       └── prisma.service.ts   # PrismaService singleton
+    ├── shared/                     # code tái sử dụng trong nhiều module
+    │   ├── prisma/
+    │   │   └── prisma.service.ts   # PrismaService singleton
+    │   ├── mailer/                 # MailService
+│   │   └── logger/                 # LoggerService
     │
     └── modules/                # các module chính
         ├── auth/

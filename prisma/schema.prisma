@@ -139,7 +139,7 @@ model Fee {
   type          FeeType
   frequency     FeeFrequency
   ratePerPerson Float? // Mức phí mỗi nhân khẩu
-  minium        Float?      @default(0)
+  minium        Float?       @default(0)
   startDate     DateTime?
   endDate       DateTime?
   createdAt     DateTime     @default(now())
@@ -163,10 +163,10 @@ model FeeAssignment {
 
 model Payment {
   id              Int      @id @default(autoincrement())
-  feeAssignmentId Int @unique
+  feeAssignmentId Int      @unique
   amountPaid      Float
   paidDate        DateTime @default(now())
   note            String?
 
-  feeAssignment FeeAssignment @relation("feePayment" ,fields: [feeAssignmentId], references: [id])
+  feeAssignment FeeAssignment @relation("feePayment", fields: [feeAssignmentId], references: [id])
 }

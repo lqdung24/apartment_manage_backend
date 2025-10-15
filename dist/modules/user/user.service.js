@@ -17,19 +17,48 @@ let UserService = class UserService {
     constructor(prisma) {
         this.prisma = prisma;
     }
-    create(data) {
+    async create(data) {
+        const existingUser = await this.prisma.users.findFirst({
+            where: {
+                OR: [
+                    { username: data.username },
+                    { email: data.email }
+                ]
+            }
+        });
+        if (existingUser) {
+            if (existingUser.username === data.username)
+                throw new common_1.ConflictException('Username already exist');
+            if (existingUser.email === data.email)
+                throw new common_1.ConflictException('Email already exits');
+        }
         return this.prisma.users.create({ data });
     }
-    findAll() {
+    async findAll() {
         return this.prisma.users.findMany();
     }
-    findById(id) {
-        return this.prisma.users.findUnique({ where: { id } });
+    async findById(id) {
+        return this.prisma.users.findUniqueOrThrow({ where: { id } });
     }
-    update(id, data) {
+    async updateById(id, data) {
+        const updatedUser = await this.prisma.users.findFirstOrThrow({ where: { id } });
+        if (data.email || data.username) {
+            const orConditions = [];
+            if (data.email)
+                orConditions.push({ email: data.email });
+            if (data.username)
+                orConditions.push({ username: data.username });
+            const conflictUser = await this.prisma.users.findFirst({
+                where: {
+                    OR: orConditions,
+                    NOT: { id },
+                },
+            });
+        }
         return this.prisma.users.update({ where: { id }, data });
     }
-    remove(id) {
+    removeById(id) {
+        this.prisma.users.findFirstOrThrow({ where: { id } });
         return this.prisma.users.delete({ where: { id } });
     }
 };

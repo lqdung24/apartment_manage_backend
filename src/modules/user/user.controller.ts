@@ -23,12 +23,12 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateUserDto) {
-    return this.userService.update(id, data);
+  updateById(@Param('id', ParseIntPipe) id: number, @Body() data: UpdateUserDto) {
+    return this.userService.updateById(id, data);
   }
 
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.remove(id);
+  removeById(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.removeById(id);
   }
 }

@@ -13,6 +13,7 @@ export class CreateUserDto {
   @IsNotEmpty()
   password: string
 
-  @IsEnum(Role, {message: "Role is not defined"})
+  @IsEnum(Role)
+  @IsNotEmpty()
   role: Role
 }

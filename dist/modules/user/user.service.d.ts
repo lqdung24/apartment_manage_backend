@@ -4,44 +4,44 @@ import { PrismaService } from "../../shared/prisma/prisma.service";
 export declare class UserService {
     private readonly prisma;
     constructor(prisma: PrismaService);
-    create(data: CreateUserDto): import("@prisma/client").Prisma.Prisma__UsersClient<{
+    create(data: CreateUserDto): Promise<{
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role;
-        createtime: Date;
+        role: import("@prisma/client").$Enums.Role | null;
         id: number;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import("@prisma/client").Prisma.PrismaPromise<{
+        createtime: Date;
+    }>;
+    findAll(): Promise<{
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role;
-        createtime: Date;
+        role: import("@prisma/client").$Enums.Role | null;
         id: number;
+        createtime: Date;
     }[]>;
-    findById(id: number): import("@prisma/client").Prisma.Prisma__UsersClient<{
+    findById(id: number): Promise<{
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role;
-        createtime: Date;
+        role: import("@prisma/client").$Enums.Role | null;
         id: number;
-    } | null, null, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    update(id: number, data: UpdateUserDto): import("@prisma/client").Prisma.Prisma__UsersClient<{
+        createtime: Date;
+    }>;
+    updateById(id: number, data: UpdateUserDto): Promise<{
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role;
-        createtime: Date;
+        role: import("@prisma/client").$Enums.Role | null;
         id: number;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
-    remove(id: number): import("@prisma/client").Prisma.Prisma__UsersClient<{
+        createtime: Date;
+    }>;
+    removeById(id: number): import("@prisma/client").Prisma.Prisma__UsersClient<{
         username: string;
         email: string;
         password: string;
-        role: import("@prisma/client").$Enums.Role;
-        createtime: Date;
+        role: import("@prisma/client").$Enums.Role | null;
         id: number;
+        createtime: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
 }

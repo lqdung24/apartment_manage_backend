@@ -31,11 +31,11 @@ let UserController = class UserController {
     findById(id) {
         return this.userService.findById(id);
     }
-    update(id, data) {
-        return this.userService.update(id, data);
+    updateById(id, data) {
+        return this.userService.updateById(id, data);
     }
-    remove(id) {
-        return this.userService.remove(id);
+    removeById(id) {
+        return this.userService.removeById(id);
     }
 };
 exports.UserController = UserController;
@@ -66,14 +66,14 @@ __decorate([
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number, update_user_dto_1.UpdateUserDto]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "update", null);
+], UserController.prototype, "updateById", null);
 __decorate([
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
     __metadata("design:type", Function),
     __metadata("design:paramtypes", [Number]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "remove", null);
+], UserController.prototype, "removeById", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])
