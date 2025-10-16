@@ -56,4 +56,10 @@ export class AuthController {
   refresh(@Request() req) {
     return this.authService.refresh(req.user);
   }
+
+  @Post('signout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('refreshToken', { path: '/' });
+    return { message: 'Logged out successfully' };
+  }
 }

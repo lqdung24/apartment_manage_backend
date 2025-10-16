@@ -30,4 +30,7 @@ export declare class AuthController {
     refresh(req: any): Promise<{
         accessToken: string;
     }>;
+    logout(res: Response): {
+        message: string;
+    };
 }

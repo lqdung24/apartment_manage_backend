@@ -48,6 +48,10 @@ let AuthController = class AuthController {
     refresh(req) {
         return this.authService.refresh(req.user);
     }
+    logout(res) {
+        res.clearCookie('refreshToken', { path: '/' });
+        return { message: 'Logged out successfully' };
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -74,6 +78,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "refresh", null);
+__decorate([
+    (0, common_1.Post)('signout'),
+    __param(0, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], AuthController.prototype, "logout", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])

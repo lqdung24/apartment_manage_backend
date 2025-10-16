@@ -2,15 +2,17 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import {ValidationPipe} from "@nestjs/common";
 import {AllExceptionsFilter} from "./common/filters/all-exceptions.filter";
-
-
+import {ResponseInterceptor} from "./common/interceptors/response.interceptor";
 const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
-  app.use(cookieParser()); // 👈 Bắt buộc
+
+  app.useGlobalInterceptors(new ResponseInterceptor());
+
+  app.use(cookieParser()); // Đọc cookie
   app.useGlobalFilters(new AllExceptionsFilter())
   // Bật global validation
   app.useGlobalPipes(new ValidationPipe({

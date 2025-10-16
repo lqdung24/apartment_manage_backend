@@ -4,11 +4,13 @@ const core_1 = require("@nestjs/core");
 const app_module_1 = require("./app.module");
 const common_1 = require("@nestjs/common");
 const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter");
+const response_interceptor_1 = require("./common/interceptors/response.interceptor");
 const cookieParser = require('cookie-parser');
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });
+    app.useGlobalInterceptors(new response_interceptor_1.ResponseInterceptor());
     app.use(cookieParser());
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
     app.useGlobalPipes(new common_1.ValidationPipe({
