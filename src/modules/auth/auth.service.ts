@@ -49,10 +49,10 @@ export class AuthService {
     const user = await this.prisma.users.findUnique({
       where: { email: dto.email },
     });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    if (!user) throw new UnauthorizedException('Your email is not exist');
 
     const match: Boolean = await bcrypt.compare(dto.password, user.password);
-    if (!match) throw new UnauthorizedException('Invalid credentials');
+    if (!match) throw new UnauthorizedException('Wrong password');
 
     const accessToken = jwt.sign(
       { id: user.id, role: user.role },

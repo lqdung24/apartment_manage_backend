@@ -22,38 +22,38 @@ import { Role } from '@prisma/client';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() data: CreateUserDto) {
-    return this.userService.create(data);
-  }
-
-  @Get()
-  findAll() {
-    return this.userService.findAll();
-  }
-
-  @Get(':id')
-  findById(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.findById(id);
-  }
-
-  @Patch(':id')
-  updateById(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() data: UpdateUserDto,
-  ) {
-    return this.userService.updateById(id, data);
-  }
-
-  @Delete(':id')
-  removeById(@Param('id', ParseIntPipe) id: number) {
-    return this.userService.removeById(id);
-  }
+  // @Post()
+  // create(@Body() data: CreateUserDto) {
+  //   return this.userService.create(data);
+  // }
+  //
+  // @Get()
+  // findAll() {
+  //   return this.userService.findAll();
+  // }
+  //
+  // @Get(':id')
+  // findById(@Param('id', ParseIntPipe) id: number) {
+  //   return this.userService.findById(id);
+  // }
+  //
+  // @Patch(':id')
+  // updateById(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() data: UpdateUserDto,
+  // ) {
+  //   return this.userService.updateById(id, data);
+  // }
+  //
+  // @Delete(':id')
+  // removeById(@Param('id', ParseIntPipe) id: number) {
+  //   return this.userService.removeById(id);
+  // }
 
   @Patch(':id/update-role')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)
-  updateRole(@Param('id', ParseIntPipe) id: number,@Body() dto: UpdateUserRoleDto) {
+  updateRole(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserRoleDto) {
     return this.userService.updateRole(id, dto);
   }
 }

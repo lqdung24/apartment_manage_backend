@@ -4,12 +4,13 @@ import {UserModule} from "./modules/user/user.module";
 import {LoggerMiddleware} from "./common/middleware/logger.middleware";
 import {AuthModule} from "./modules/auth/auth.module";
 import { ConfigModule } from '@nestjs/config';
+import {HouseHoldModule} from "./modules/house-hold/house-hold.module";
+import {ResidentModule} from "./modules/resident/resident.module";
 
 @Module({
   imports: [PrismaModule, UserModule, AuthModule,
-    ConfigModule.forRoot({
-      isGlobal: true,
-    })
+    ConfigModule.forRoot({ isGlobal: true, }),
+    ResidentModule, HouseHoldModule,
   ],
 })
 export class AppModule implements NestModule{

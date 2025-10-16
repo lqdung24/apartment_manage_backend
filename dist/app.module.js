@@ -13,6 +13,8 @@ const user_module_1 = require("./modules/user/user.module");
 const logger_middleware_1 = require("./common/middleware/logger.middleware");
 const auth_module_1 = require("./modules/auth/auth.module");
 const config_1 = require("@nestjs/config");
+const house_hold_module_1 = require("./modules/house-hold/house-hold.module");
+const resident_module_1 = require("./modules/resident/resident.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -22,9 +24,8 @@ exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [prisma_module_1.PrismaModule, user_module_1.UserModule, auth_module_1.AuthModule,
-            config_1.ConfigModule.forRoot({
-                isGlobal: true,
-            })
+            config_1.ConfigModule.forRoot({ isGlobal: true, }),
+            resident_module_1.ResidentModule, house_hold_module_1.HouseHoldModule,
         ],
     })
 ], AppModule);

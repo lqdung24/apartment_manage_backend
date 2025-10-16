@@ -34,15 +34,18 @@ model HouseHolds {
   id              Int             @id @default(autoincrement())
   houseHoldCode   Int             @unique // số hộ khẩu
   apartmentNumber String          @unique // số căn hộ
-  buildingNumber  String? // Số nhà
-  street          String? // Tên đường / ngõ
-  ward            String? // Xã / Phường
-  province        String? // Tỉnh / Thành phố
-  status          HouseHoldStatus
+  buildingNumber  String // Số nhà
+  street          String // Tên đường / ngõ
+  ward            String // Xã / Phường
+  province        String // Tỉnh / Thành phố
+  status          HouseHoldStatus @default(ACTIVE)
   createtime      DateTime        @default(now())
+
   headID          Int             @unique // id chủ hộ
   head            Resident        @relation("headOfHouse", fields: [headID], references: [id])
+
   resident        Resident[]      @relation("houseMembers") // nhân khẩu trong 1 hộ
+
   userID          Int             @unique
   account         Users           @relation("account", fields: [userID], references: [id]) // một hộ có 1 tài khoản
 
@@ -58,20 +61,20 @@ enum HouseHoldStatus {
 model Resident {
   id                 Int                @id @default(autoincrement())
   nationalId         String             @unique // cccd
-  phoneNumber        String
-  email              String
-  idCardIssueDate    DateTime?
+  phoneNumber        String @unique
+  email              String @unique
   fullname           String
-  dateOfBirth        DateTime?
-  gender             Gender?
+  dateOfBirth        DateTime
+  gender             Gender
   relationshipToHead RelationshipToHead // quan hệ với chủ hộ
-  placeOfOrigin      String? // Quê quán
-  occupation         String? // Nghề nghiệp
-  workingAdress      String? // noi lam viec
-  houseHoldId        Int? // hộ khẩu
+  placeOfOrigin      String // Quê quán
+  occupation         String // Nghề nghiệp
+  workingAdress      String // noi lam viec
   residencStatus     ResidenceStatus    @default(NORMAL)
+  houseHoldId        Int? // hộ khẩu
+
   houseHold          HouseHolds?        @relation("houseMembers", fields: [houseHoldId], references: [id])
-  headedHouse        HouseHolds?        @relation("headOfHouse")
+  headedHouse        HouseHolds?        @relation("headOfHouse") // lay id chu ho
 
   TemporaryResidence TemporaryResidence[] @relation("tempResidence")
   TemporaryAbsence   TemporaryAbsence[]   @relation("tempAbsence")

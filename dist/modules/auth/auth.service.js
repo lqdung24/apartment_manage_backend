@@ -79,10 +79,10 @@ let AuthService = class AuthService {
             where: { email: dto.email },
         });
         if (!user)
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Your email is not exist');
         const match = await bcrypt.compare(dto.password, user.password);
         if (!match)
-            throw new common_1.UnauthorizedException('Invalid credentials');
+            throw new common_1.UnauthorizedException('Wrong password');
         const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), {
             expiresIn: '15m',
         });
