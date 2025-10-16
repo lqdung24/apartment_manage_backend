@@ -23,11 +23,27 @@ let AuthController = class AuthController {
     constructor(authService) {
         this.authService = authService;
     }
-    signup(dto) {
-        return this.authService.signup(dto);
+    async signup(dto, res) {
+        const { user, accessToken, refreshToken } = await this.authService.signup(dto);
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: false,
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        return { user, accessToken };
     }
-    signin(dto) {
-        return this.authService.signin(dto);
+    async signin(dto, res) {
+        const { user, accessToken, refreshToken } = await this.authService.signin(dto);
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            sameSite: 'lax',
+            secure: false,
+            path: '/',
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+        return { user, accessToken };
     }
     refresh(req) {
         return this.authService.refresh(req.user);
@@ -37,16 +53,18 @@ exports.AuthController = AuthController;
 __decorate([
     (0, common_1.Post)('signup'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [sign_up_dto_1.SignUpDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [sign_up_dto_1.SignUpDto, Object]),
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signup", null);
 __decorate([
     (0, common_1.Post)('signin'),
     __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [sign_in_dto_1.SignInDto]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [sign_in_dto_1.SignInDto, Object]),
+    __metadata("design:returntype", Promise)
 ], AuthController.prototype, "signin", null);
 __decorate([
     (0, common_1.Post)('refresh'),

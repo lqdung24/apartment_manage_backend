@@ -1,4 +1,12 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Res
+} from '@nestjs/common';
+import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
@@ -8,20 +16,44 @@ import { AuthGuard } from '@nestjs/passport';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  // ---------------- SIGN UP ----------------
   @Post('signup')
-  signup(@Body() dto: SignUpDto) {
-    return this.authService.signup(dto);
+  async signup(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
+    const { user, accessToken, refreshToken } = await this.authService.signup(dto);
+
+    // Gắn refresh token vào cookie
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false, // để test với Postman (khi deploy nên set true)
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+    });
+
+    // Trả về user + access token
+    return { user, accessToken };
   }
 
+  // ---------------- SIGN IN ----------------
   @Post('signin')
-  signin(@Body() dto: SignInDto) {
-    return this.authService.signin(dto);
+  async signin(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
+    const { user, accessToken, refreshToken } = await this.authService.signin(dto);
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      path: '/',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    return { user, accessToken };
   }
 
+  // ---------------- REFRESH TOKEN ----------------
   @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))
-  refresh(@Request() req){
-    
-    return this.authService.refresh(req.user)
+  refresh(@Request() req) {
+    return this.authService.refresh(req.user);
   }
 }
