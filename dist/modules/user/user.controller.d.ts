@@ -9,6 +9,8 @@ export declare class UserController {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }>;
 }

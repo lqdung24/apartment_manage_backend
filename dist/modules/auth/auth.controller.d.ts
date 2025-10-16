@@ -11,6 +11,8 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
@@ -22,6 +24,8 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
@@ -33,6 +37,8 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
@@ -41,4 +47,13 @@ export declare class AuthController {
     logout(res: Response): {
         message: string;
     };
+    forgotPassword(email: string): Promise<{
+        message: string;
+    }>;
+    resetPassword(body: {
+        token: string;
+        newPassword: string;
+    }): Promise<{
+        message: string;
+    }>;
 }

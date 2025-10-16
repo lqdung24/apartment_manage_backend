@@ -49,12 +49,16 @@ const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
 const config_1 = require("@nestjs/config");
+const node_crypto_1 = require("node:crypto");
+const mail_service_1 = require("../../common/mail/mail.service");
 let AuthService = class AuthService {
     prisma;
     configService;
-    constructor(prisma, configService) {
+    mailService;
+    constructor(prisma, configService, mailService) {
         this.prisma = prisma;
         this.configService = configService;
+        this.mailService = mailService;
     }
     async signup(dto) {
         const exist = await this.prisma.users.findFirst({
@@ -98,10 +102,43 @@ let AuthService = class AuthService {
         });
         return { user, accessToken };
     }
+    async forgotPassword(email) {
+        const user = await this.prisma.users.findUnique({ where: { email } });
+        const message = { message: 'If this email exists, a reset link has been sent' };
+        if (!user)
+            return message;
+        const resetToken = (0, node_crypto_1.randomBytes)(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 60);
+        await this.prisma.users.update({
+            where: { email },
+            data: { resetToken, resetTokenExpiry },
+        });
+        const resetLink = `http://localhost:3030/auth/reset-password?token=${resetToken}`;
+        await this.mailService.sendMail(email, 'Reset your password', `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`);
+        return message;
+    }
+    async resetPassword(token, newPassword) {
+        const user = await this.prisma.users.findFirst({
+            where: {
+                resetToken: token,
+                resetTokenExpiry: { gte: new Date() },
+            },
+        });
+        if (!user)
+            throw new Error('Invalid or expired token');
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        await this.prisma.users.update({
+            where: { id: user.id },
+            data: { password: hashedPassword, resetToken: null, resetTokenExpiry: null },
+        });
+        return { message: 'Password reset successfully' };
+    }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService, config_1.ConfigService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        config_1.ConfigService,
+        mail_service_1.MailService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

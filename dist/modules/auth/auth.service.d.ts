@@ -2,16 +2,20 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
 import { SignUpDto } from './dto/sign-up.dto';
 import { SignInDto } from './dto/sign-in.dto';
 import { ConfigService } from '@nestjs/config';
+import { MailService } from "../../common/mail/mail.service";
 export declare class AuthService {
     private prisma;
     private configService;
-    constructor(prisma: PrismaService, configService: ConfigService);
+    private mailService;
+    constructor(prisma: PrismaService, configService: ConfigService, mailService: MailService);
     signup(dto: SignUpDto): Promise<{
         user: {
             username: string;
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
@@ -24,6 +28,8 @@ export declare class AuthService {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
@@ -39,9 +45,17 @@ export declare class AuthService {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
             createtime: Date;
             id: number;
         };
         accessToken: string;
+    }>;
+    forgotPassword(email: string): Promise<{
+        message: string;
+    }>;
+    resetPassword(token: string, newPassword: string): Promise<{
+        message: string;
     }>;
 }

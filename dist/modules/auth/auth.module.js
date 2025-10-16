@@ -14,12 +14,13 @@ const auth_service_1 = require("./auth.service");
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const auth_controller_1 = require("./auth.controller");
 const refresh_token_strategy_1 = require("./refresh-token.strategy");
+const mail_module_1 = require("../../common/mail/mail.module");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [passport_1.PassportModule],
+        imports: [passport_1.PassportModule, mail_module_1.MailModule],
         providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, prisma_service_1.PrismaService, refresh_token_strategy_1.RefreshTokenStrategy],
         controllers: [auth_controller_1.AuthController],
         exports: [auth_service_1.AuthService],

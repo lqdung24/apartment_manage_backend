@@ -20,6 +20,8 @@ model Users {
   email      String      @unique
   password   String
   role       Role
+  resetToken       String?  // token reset
+  resetTokenExpiry DateTime? // thời hạn token
   createtime DateTime    @default(now())
   HouseHolds HouseHolds? @relation("account") // tài khoản của hộ gia đình
 }

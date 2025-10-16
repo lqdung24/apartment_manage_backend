@@ -62,4 +62,14 @@ export class AuthController {
     res.clearCookie('refreshToken', { path: '/' });
     return { message: 'Logged out successfully' };
   }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body: { token: string; newPassword: string }) {
+    return this.authService.resetPassword(body.token, body.newPassword);
+  }
 }

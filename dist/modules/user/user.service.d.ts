@@ -11,6 +11,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }>;
     findAll(): Promise<{
@@ -19,6 +21,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }[]>;
     findById(id: number): Promise<{
@@ -27,6 +31,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }>;
     updateById(id: number, data: UpdateUserDto): Promise<{
@@ -35,6 +41,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }>;
     removeById(id: number): import("@prisma/client").Prisma.Prisma__UsersClient<{
@@ -43,6 +51,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import("@prisma/client").Prisma.PrismaClientOptions>;
     updateRole(id: number, dto: UpdateUserRoleDto): Promise<{
@@ -51,6 +61,8 @@ export declare class UserService {
         password: string;
         role: import("@prisma/client").$Enums.Role;
         id: number;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         createtime: Date;
     }>;
 }
