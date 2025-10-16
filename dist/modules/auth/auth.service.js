@@ -91,9 +91,12 @@ let AuthService = class AuthService {
         });
         return { user, accessToken, refreshToken };
     }
-    async refresh(user) {
-        const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), { expiresIn: '15m' });
-        return { accessToken };
+    async refresh(user2) {
+        const accessToken = jwt.sign({ id: user2.id, role: user2.role }, this.configService.get('JWT_SECRET'), { expiresIn: '15m' });
+        const user = await this.prisma.users.findUniqueOrThrow({
+            where: { id: user2.id },
+        });
+        return { user, accessToken };
     }
 };
 exports.AuthService = AuthService;

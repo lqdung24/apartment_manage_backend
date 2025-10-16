@@ -10,6 +10,10 @@ async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
         logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });
+    app.enableCors({
+        origin: 'http://localhost:3000',
+        credentials: true,
+    });
     app.useGlobalInterceptors(new response_interceptor_1.ResponseInterceptor());
     app.use(cookieParser());
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());
@@ -18,7 +22,7 @@ async function bootstrap() {
         forbidNonWhitelisted: true,
         transform: true,
     }));
-    await app.listen(process.env.PORT ?? 3000);
+    await app.listen(process.env.PORT ?? 3030);
     console.log(`Server running on http://localhost:${process.env.PORT}`);
 }
 bootstrap();

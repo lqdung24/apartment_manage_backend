@@ -35,8 +35,8 @@ export class AuthService {
     );
 
     const refreshToken = jwt.sign(
-      { id: user.id }, 
-      this.configService.get<string>('JWT_REFRESH_SECRET')!, 
+      { id: user.id },
+      this.configService.get<string>('JWT_REFRESH_SECRET')!,
       {
         expiresIn: '1d',
       }
@@ -63,8 +63,8 @@ export class AuthService {
     );
 
     const refreshToken = jwt.sign(
-      { id: user.id }, 
-      this.configService.get<string>('JWT_REFRESH_SECRET')!, 
+      { id: user.id },
+      this.configService.get<string>('JWT_REFRESH_SECRET')!,
       {
         expiresIn: '1d',
       }
@@ -73,13 +73,17 @@ export class AuthService {
     return { user, accessToken, refreshToken };
   }
 
-  async refresh(user: {id: number; role: string}){
+  async refresh(user2: {id: number; role: string}){
     const accessToken = jwt.sign(
-      {id: user.id, role: user.role},
+      {id: user2.id, role: user2.role},
       this.configService.get<string>('JWT_SECRET')!,
       { expiresIn: '15m' }
     )
 
-    return { accessToken };
+    const user = await this.prisma.users.findUniqueOrThrow({
+      where: { id: user2.id },
+    });
+
+    return { user, accessToken };
   }
 }

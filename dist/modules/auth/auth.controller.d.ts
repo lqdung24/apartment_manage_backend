@@ -28,6 +28,14 @@ export declare class AuthController {
         accessToken: string;
     }>;
     refresh(req: any): Promise<{
+        user: {
+            username: string;
+            email: string;
+            password: string;
+            role: import("@prisma/client").$Enums.Role;
+            id: number;
+            createtime: Date;
+        };
         accessToken: string;
     }>;
     logout(res: Response): {

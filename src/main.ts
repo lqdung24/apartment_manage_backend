@@ -9,7 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     logger: ['error', 'warn', 'log', 'debug', 'verbose'],
   });
-
+  app.enableCors({
+    origin: 'http://localhost:3000',
+    credentials: true,
+  });
   app.useGlobalInterceptors(new ResponseInterceptor());
 
   app.use(cookieParser()); // Đọc cookie
@@ -21,7 +24,7 @@ async function bootstrap() {
     transform: true,              // tự động chuyển đổi payload sang class
   }));
 
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3030);
   console.log(`Server running on http://localhost:${process.env.PORT}`);
 }
 bootstrap();
