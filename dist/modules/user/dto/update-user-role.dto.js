@@ -17,7 +17,7 @@ class UpdateUserRoleDto {
 }
 exports.UpdateUserRoleDto = UpdateUserRoleDto;
 __decorate([
-    (0, class_validator_1.IsEnum)(client_1.Role, { message: 'Role not exist' }),
+    (0, class_validator_1.IsEnum)(client_1.Role, { message: 'Role is not exist' }),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], UpdateUserRoleDto.prototype, "role", void 0);

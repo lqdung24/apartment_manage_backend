@@ -50,13 +50,10 @@ export class UserController {
     return this.userService.removeById(id);
   }
 
-  @Patch(':id/role')
+  @Patch(':id/update-role')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles(Role.ADMIN)
-  updateRole(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() dto: UpdateUserRoleDto,
-  ) {
+  updateRole(@Param('id', ParseIntPipe) id: number,@Body() dto: UpdateUserRoleDto) {
     return this.userService.updateRole(id, dto);
   }
 }

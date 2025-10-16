@@ -83,7 +83,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "removeById", null);
 __decorate([
-    (0, common_1.Patch)(':id/role'),
+    (0, common_1.Patch)(':id/update-role'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
     __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
