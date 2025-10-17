@@ -24,7 +24,7 @@ async function bootstrap() {
     transform: true,              // tự động chuyển đổi payload sang class
   }));
 
-  await app.listen(process.env.PORT ?? 3030);
+  await app.listen(process.env.PORT ?? 3000);
   console.log(`Server running on http://localhost:${process.env.PORT}`);
 }
 bootstrap();

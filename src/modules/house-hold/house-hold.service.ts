@@ -1,8 +1,9 @@
-import {ConflictException, Injectable} from '@nestjs/common';
+import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {ResidentService} from "../resident/resident.service";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
-import {HouseHoldStatus} from "@prisma/client";
+import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
+import {CreateResidentDto} from "../resident/dto/create-resident.dto";
 
 
 @Injectable()
@@ -59,5 +60,15 @@ export class HouseHoldService {
     resident.houseHoldId = household.id;
 
     return { household, resident }
+  }
+
+  async addHouseMember(userId: number, dto: CreateResidentDto){
+    const household = await this.prisma.houseHolds.findFirst({where: { userID: userId }})
+    if(!household)
+      throw new NotFoundException("Household with this userId not found")
+    if(household.headID && dto.relationshipToHead == RelationshipToHead.HEAD)
+      throw new ConflictException("This Household already has head")
+    dto.houseHoldId = household.id;
+    return this.residentService.createResident(dto);
   }
 }

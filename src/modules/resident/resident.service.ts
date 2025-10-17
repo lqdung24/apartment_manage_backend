@@ -43,11 +43,13 @@ export class ResidentService {
     return resident;
   }
 
-  assignHouseHold(id: number, houseHoldId: number){
-    this.prisma.resident.findFirstOrThrow({
+  async assignHouseHold(id: number, houseHoldId: number){
+    await this.prisma.resident.findFirstOrThrow({
       where: {id}
     })
-
+    await this.prisma.houseHolds.findFirstOrThrow({
+      where: { id : houseHoldId }
+    })
     return this.prisma.resident.update({
       where: {id},
       data: {houseHoldId}
