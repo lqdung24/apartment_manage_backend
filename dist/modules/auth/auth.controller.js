@@ -52,6 +52,12 @@ let AuthController = class AuthController {
         res.clearCookie('refreshToken', { path: '/' });
         return { message: 'Logged out successfully' };
     }
+    async forgotPassword(email) {
+        return this.authService.forgotPassword(email);
+    }
+    async resetPassword(body) {
+        return this.authService.resetPassword(body.token, body.newPassword);
+    }
 };
 exports.AuthController = AuthController;
 __decorate([
@@ -85,6 +91,20 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", void 0)
 ], AuthController.prototype, "logout", null);
+__decorate([
+    (0, common_1.Post)('forgot-password'),
+    __param(0, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('reset-password'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resetPassword", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     __metadata("design:paramtypes", [auth_service_1.AuthService])
