@@ -120,6 +120,19 @@ export class AuthService {
 
     return message;
   }
+  // verify token
+  async verifyResetToken(token: string) {
+  const user = await this.prisma.users.findFirst({
+    where: {
+      resetToken: token,
+      resetTokenExpiry: { gte: new Date() }, // còn hạn
+    },
+  });
+
+  if (!user) throw new Error('Invalid or expired token');
+  return { message: 'Valid token' };
+}
+
 
   // Step 2: Reset Password
   async resetPassword(token: string, newPassword: string) {

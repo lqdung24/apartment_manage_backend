@@ -68,6 +68,11 @@ export class AuthController {
     return this.authService.forgotPassword(email);
   }
 
+  @Post('verify-reset-token')
+  async verifyResetToken(@Body('token') token: string){
+    return this.authService.verifyResetToken(token);
+  }
+
   @Post('reset-password')
   async resetPassword(@Body() body: { token: string; newPassword: string }) {
     return this.authService.resetPassword(body.token, body.newPassword);

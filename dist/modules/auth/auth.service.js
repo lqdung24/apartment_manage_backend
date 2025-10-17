@@ -117,6 +117,17 @@ let AuthService = class AuthService {
         await this.mailService.sendMail(email, 'Reset your password', `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`);
         return message;
     }
+    async verifyResetToken(token) {
+        const user = await this.prisma.users.findFirst({
+            where: {
+                resetToken: token,
+                resetTokenExpiry: { gte: new Date() },
+            },
+        });
+        if (!user)
+            throw new Error('Invalid or expired token');
+        return { message: 'Valid token' };
+    }
     async resetPassword(token, newPassword) {
         const user = await this.prisma.users.findFirst({
             where: {

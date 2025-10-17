@@ -11,7 +11,7 @@ async function bootstrap() {
         logger: ['error', 'warn', 'log', 'debug', 'verbose'],
     });
     app.enableCors({
-        origin: 'http://localhost:3000',
+        origin: 'http://localhost:3030',
         credentials: true,
     });
     app.useGlobalInterceptors(new response_interceptor_1.ResponseInterceptor());

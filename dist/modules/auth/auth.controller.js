@@ -55,6 +55,9 @@ let AuthController = class AuthController {
     async forgotPassword(email) {
         return this.authService.forgotPassword(email);
     }
+    async verifyResetToken(token) {
+        return this.authService.verifyResetToken(token);
+    }
     async resetPassword(body) {
         return this.authService.resetPassword(body.token, body.newPassword);
     }
@@ -98,6 +101,13 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "forgotPassword", null);
+__decorate([
+    (0, common_1.Post)('verify-reset-token'),
+    __param(0, (0, common_1.Body)('token')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "verifyResetToken", null);
 __decorate([
     (0, common_1.Post)('reset-password'),
     __param(0, (0, common_1.Body)()),
