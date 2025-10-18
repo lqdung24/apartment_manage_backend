@@ -19,4 +19,9 @@ export class HouseHoldController {
   addHouseMember(@Req() req, @Body() dto: CreateResidentDto){
     return this.houseHoldService.addHouseMember(req.user.id, dto);
   }
+  @Get()
+  @UseGuards(AuthGuard('jwt'))
+  getHouseHold(@Req() req){
+    return this.houseHoldService.getHouseHoldByUserId(req.user.id);
+  }
 }

@@ -61,6 +61,14 @@ export class HouseHoldService {
 
     return { household, resident }
   }
+  async getHouseHoldByUserId(userId: number){
+    const household = await this.prisma.houseHolds.findFirst({
+      where: {
+        userID: userId
+      }
+    });
+    return household;
+  }
 
   async addHouseMember(userId: number, dto: CreateResidentDto){
     const household = await this.prisma.houseHolds.findFirst({where: { userID: userId }})
