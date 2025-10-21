@@ -79,4 +79,12 @@ export class HouseHoldService {
     dto.houseHoldId = household.id;
     return this.residentService.createResident(dto);
   }
+  async getMember(userId: number){
+    const household = await this.prisma.houseHolds.findFirst({
+      where: {userID: userId}
+    })
+    if(!household)
+        throw new NotFoundException("Household with this userId not found")
+    return this.residentService.getResidentByHouseHoldId(household.id)
+  }
 }

@@ -55,4 +55,11 @@ export class ResidentService {
       data: {houseHoldId}
     })
   }
+
+  async getResidentByHouseHoldId(houseHoldId: number){
+    // Lấy tất cả resident có houseHoldId trùng với household.id
+    return this.prisma.resident.findMany({
+      where: { houseHoldId }
+    });
+  }
 }

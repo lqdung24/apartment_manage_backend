@@ -24,4 +24,9 @@ export class HouseHoldController {
   getHouseHold(@Req() req){
     return this.houseHoldService.getHouseHoldByUserId(req.user.id);
   }
+  @Get('member')
+  @UseGuards(AuthGuard('jwt'))
+  getResidentByHouseHoldId(@Req() req){
+    return this.houseHoldService.getMember(req.user.id);
+  }
 }
