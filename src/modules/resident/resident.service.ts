@@ -1,4 +1,4 @@
-import {ConflictException, Injectable} from '@nestjs/common';
+import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateResidentDto} from "./dto/create-resident.dto";
 
@@ -62,4 +62,24 @@ export class ResidentService {
       where: { houseHoldId }
     });
   }
+  async deleteResident(id: number){
+    const resident = await this.prisma.resident.findUnique({ where: { id } });
+    if (!resident) {
+      throw new NotFoundException("Resident not found");
+    }
+    return this.prisma.resident.delete({ where: { id } });
+  }
+  async updateResident(id: number, dto: Partial<CreateResidentDto>){
+    const resident = await this.prisma.resident.findUnique({ where: {id} });
+    if(!resident){
+      throw new NotFoundException("Resident not found")
+    }
+    // Chuyển đổi dateOfBirth sang Date nếu tồn tại
+    let updateData = { ...dto };
+    if (dto.dateOfBirth) {
+      (updateData as any).dateOfBirth = new Date(dto.dateOfBirth);
+    }
+    return this.prisma.resident.update({ where: { id }, data: updateData });
+  }
+  
 }

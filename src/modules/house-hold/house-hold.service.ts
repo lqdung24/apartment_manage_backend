@@ -5,7 +5,6 @@ import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
 import {CreateResidentDto} from "../resident/dto/create-resident.dto";
 
-
 @Injectable()
 export class HouseHoldService {
   constructor(private readonly prisma: PrismaService,
@@ -86,5 +85,37 @@ export class HouseHoldService {
     if(!household)
         throw new NotFoundException("Household with this userId not found")
     return this.residentService.getResidentByHouseHoldId(household.id)
+  }
+  async removeMember(userId: number, residentId: number) {
+    const household = await this.prisma.houseHolds.findFirst({ where: { userID: userId } });
+    if (!household)
+      throw new NotFoundException("Household with this userId not found");
+
+    // Kiểm tra resident có thuộc household này không
+    const resident = await this.prisma.resident.findFirst({
+      where: { id: residentId, houseHoldId: household.id }
+    });
+    if (!resident)
+      throw new NotFoundException("Resident not found in this household");
+
+    // Không cho phép xóa chủ hộ
+    if (household.headID === residentId)
+      throw new ConflictException("Cannot remove head of household");
+
+    return this.residentService.deleteResident(residentId);
+  }
+  async updateMember(userId: number, residentId: number, dto: Partial<CreateResidentDto>) {
+    const household = await this.prisma.houseHolds.findFirst({ where: { userID: userId } });
+    if (!household)
+      throw new NotFoundException("Household with this userId not found");
+
+    // Kiểm tra resident có thuộc household này không
+    const resident = await this.prisma.resident.findFirst({
+      where: { id: residentId, houseHoldId: household.id }
+    });
+    if (!resident)
+      throw new NotFoundException("Resident not found in this household");
+
+    return this.residentService.updateResident(residentId, dto);
   }
 }
