@@ -24,20 +24,74 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     // Prisma known request errors
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
-      // Mã lỗi Prisma: https://www.prisma.io/docs/reference/api-reference/error-reference
-      switch (exception.code) {
-        case 'P2002': // unique constraint failed
+      // Tài liệu mã lỗi Prisma:
+      // https://www.prisma.io/docs/reference/api-reference/error-reference
+
+      const code = exception.code;
+      const meta = exception.meta;
+
+      switch (code) {
+        /**
+         * Lỗi unique constraint (email duplicate, username duplicate...)
+         */
+        case 'P2002':
           status = HttpStatus.CONFLICT;
-          const fields = (exception.meta?.target as string[])?.join(', ') || 'unknown';
-          message = `Duplicate value for field(s): ${fields}`;
+          message = `Duplicate value for field(s): ${(meta?.target as string[])?.join(', ')}`;
           break;
-        case 'P2025': // record not found
+
+        /**
+         * Record không tồn tại khi update/delete/findUnique...
+         */
+        case 'P2025':
           status = HttpStatus.NOT_FOUND;
           message = 'Record not found';
           break;
+
+        /**
+         * Foreign key constraint: dữ liệu liên quan không tồn tại
+         */
+        case 'P2003':
+          status = HttpStatus.BAD_REQUEST;
+          message = 'Invalid reference to another resource';
+          break;
+
+        /**
+         * Unique xác định nhưng không tìm thấy bản ghi (liên quan thay đổi schema)
+         */
+        case 'P2016':
+          status = HttpStatus.NOT_FOUND;
+          message = 'Query interpretation error (possibly invalid ID)';
+          break;
+
+        /**
+         * Column null trong khi schema yêu cầu not-null
+         */
+        case 'P2011':
+          status = HttpStatus.BAD_REQUEST;
+          message = `Null value provided for required field`;
+          break;
+
+        /**
+         * Enum không hợp lệ
+         */
+
+        case 'P2020':
+          status = HttpStatus.BAD_REQUEST;
+          message = 'Value out of range for the field';
+          break;
+
+        /**
+         * Vi phạm unique của composite key
+         */
+        case 'P2034':
+          status = HttpStatus.CONFLICT;
+          message = 'Composite key already exists';
+          break;
+
+        // Fallback cho các lỗi đã xác định nhưng chưa xử lý
         default:
           status = HttpStatus.INTERNAL_SERVER_ERROR;
-          message = exception.message;
+          message = exception.message ?? 'Database error';
           break;
       }
     }

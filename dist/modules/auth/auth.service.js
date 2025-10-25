@@ -61,11 +61,6 @@ let AuthService = class AuthService {
         this.mailService = mailService;
     }
     async signup(dto) {
-        const exist = await this.prisma.users.findFirst({
-            where: { OR: [{ email: dto.email }, { username: dto.username }] },
-        });
-        if (exist)
-            throw new common_1.ConflictException('Email or username already exists');
         const hashed = await bcrypt.hash(dto.password, 10);
         const user = await this.prisma.users.create({
             data: { ...dto, password: hashed, role: client_1.Role.USER },
@@ -79,11 +74,9 @@ let AuthService = class AuthService {
         return { user, accessToken, refreshToken };
     }
     async signin(dto) {
-        const user = await this.prisma.users.findUnique({
+        const user = await this.prisma.users.findUniqueOrThrow({
             where: { email: dto.email },
         });
-        if (!user)
-            throw new common_1.UnauthorizedException('Your email is not exist');
         const match = await bcrypt.compare(dto.password, user.password);
         if (!match)
             throw new common_1.UnauthorizedException('Wrong password');

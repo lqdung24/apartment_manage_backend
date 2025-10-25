@@ -1,6 +1,5 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
 } from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
@@ -22,10 +21,6 @@ export class AuthService {
   {}
 
   async signup(dto: SignUpDto) {
-    const exist = await this.prisma.users.findFirst({
-      where: { OR: [{ email: dto.email }, { username: dto.username }] },
-    });
-    if (exist) throw new ConflictException('Email or username already exists');
 
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.users.create({
@@ -52,10 +47,9 @@ export class AuthService {
   }
 
   async signin(dto: SignInDto) {
-    const user = await this.prisma.users.findUnique({
+    const user = await this.prisma.users.findUniqueOrThrow({
       where: { email: dto.email },
     });
-    if (!user) throw new UnauthorizedException('Your email is not exist');
 
     const match: Boolean = await bcrypt.compare(dto.password, user.password);
     if (!match) throw new UnauthorizedException('Wrong password');

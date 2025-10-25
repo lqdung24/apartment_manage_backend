@@ -6,7 +6,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  // output   = "../generated/prisma"
 }
 
 datasource db {
@@ -23,6 +22,8 @@ model Users {
   resetToken       String?  // token reset
   resetTokenExpiry DateTime? // thời hạn token
   createtime DateTime    @default(now())
+
+  householdId Int?        @unique
   HouseHolds HouseHolds? @relation("account") // tài khoản của hộ gia đình
 }
 

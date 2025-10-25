@@ -25,19 +25,40 @@ let AllExceptionsFilter = class AllExceptionsFilter {
                 message = res.message;
         }
         else if (exception instanceof client_1.Prisma.PrismaClientKnownRequestError) {
-            switch (exception.code) {
+            const code = exception.code;
+            const meta = exception.meta;
+            switch (code) {
                 case 'P2002':
                     status = common_1.HttpStatus.CONFLICT;
-                    const fields = exception.meta?.target?.join(', ') || 'unknown';
-                    message = `Duplicate value for field(s): ${fields}`;
+                    message = `Duplicate value for field(s): ${meta?.target?.join(', ')}`;
                     break;
                 case 'P2025':
                     status = common_1.HttpStatus.NOT_FOUND;
                     message = 'Record not found';
                     break;
+                case 'P2003':
+                    status = common_1.HttpStatus.BAD_REQUEST;
+                    message = 'Invalid reference to another resource';
+                    break;
+                case 'P2016':
+                    status = common_1.HttpStatus.NOT_FOUND;
+                    message = 'Query interpretation error (possibly invalid ID)';
+                    break;
+                case 'P2011':
+                    status = common_1.HttpStatus.BAD_REQUEST;
+                    message = `Null value provided for required field`;
+                    break;
+                case 'P2020':
+                    status = common_1.HttpStatus.BAD_REQUEST;
+                    message = 'Value out of range for the field';
+                    break;
+                case 'P2034':
+                    status = common_1.HttpStatus.CONFLICT;
+                    message = 'Composite key already exists';
+                    break;
                 default:
                     status = common_1.HttpStatus.INTERNAL_SERVER_ERROR;
-                    message = exception.message;
+                    message = exception.message ?? 'Database error';
                     break;
             }
         }

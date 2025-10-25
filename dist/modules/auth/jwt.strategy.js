@@ -33,7 +33,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         if (!user) {
             throw new Error('Invalid token');
         }
-        return { id: user.id, role: user.role };
+        return { id: user.id, role: user.role, householdId: user.householdId };
     }
 };
 exports.JwtStrategy = JwtStrategy;

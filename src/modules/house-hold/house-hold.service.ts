@@ -4,42 +4,19 @@ import {ResidentService} from "../resident/resident.service";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
 import {CreateResidentDto} from "../resident/dto/create-resident.dto";
+import {UserService} from "../user/user.service";
 
 @Injectable()
 export class HouseHoldService {
   constructor(private readonly prisma: PrismaService,
-              private readonly residentService: ResidentService) {}
+              private readonly residentService: ResidentService,
+              private readonly userService: UserService
+  ) {}
 
   async createHouseHoldWithUserAndResident(userId: number, dto: CreateHouseHoldAndHeadDto) {
     //flow: tạo resident -> household (với user và resident đã tạo)
     // liên kết resident với house hold
     const resident = await this.residentService.createResident(dto.resident);
-
-    const conflict = await this.prisma.houseHolds.findFirst({
-      where: {
-        OR: [
-          {houseHoldCode: dto.household.houseHoldCode},
-          {apartmentNumber: dto.household.apartmentNumber},
-          {headID: resident.id},
-          {userID: userId}
-        ]
-      }
-    })
-
-    if (conflict) {
-      const conflicts: string[] = [];
-
-      if (dto.household.houseHoldCode === conflict.houseHoldCode)
-        conflicts.push("houseHoldCode");
-      if (dto.household.apartmentNumber === conflict.apartmentNumber)
-        conflicts.push("apartmentNumber");
-      if (resident.id === conflict.headID)
-        conflicts.push("headID");
-      if (userId === conflict.userID)
-        conflicts.push("userID");
-
-      throw new ConflictException(`${conflicts.join(", ")} already exist`);
-    }
 
     const household = await this.prisma.houseHolds.create({
       data: {
@@ -54,19 +31,18 @@ export class HouseHoldService {
         head: { connect: { id: resident.id } }, // connect resident chủ hộ
       },
     });
-
+    await this.userService.updateHouseholdId(userId, household.id)
     await this.residentService.assignHouseHold(resident.id, household.id);
     resident.houseHoldId = household.id;
 
     return { household, resident }
   }
   async getHouseHoldByUserId(userId: number){
-    const household = await this.prisma.houseHolds.findFirst({
+    return this.prisma.houseHolds.findFirstOrThrow({
       where: {
         userID: userId
       }
     });
-    return household;
   }
 
   async addHouseMember(userId: number, dto: CreateResidentDto){
@@ -78,25 +54,13 @@ export class HouseHoldService {
     dto.houseHoldId = household.id;
     return this.residentService.createResident(dto);
   }
-  async getMember(userId: number){
-    const household = await this.prisma.houseHolds.findFirst({
-      where: {userID: userId}
-    })
-    if(!household)
-        throw new NotFoundException("Household with this userId not found")
-    return this.residentService.getResidentByHouseHoldId(household.id)
+  async getAllMember(householdId: number){
+    return this.residentService.getResidentByHouseHoldId(householdId)
   }
   async removeMember(userId: number, residentId: number) {
-    const household = await this.prisma.houseHolds.findFirst({ where: { userID: userId } });
-    if (!household)
-      throw new NotFoundException("Household with this userId not found");
-
-    // Kiểm tra resident có thuộc household này không
-    const resident = await this.prisma.resident.findFirst({
-      where: { id: residentId, houseHoldId: household.id }
+    const household = await this.prisma.houseHolds.findFirstOrThrow({
+      where: { userID: userId }
     });
-    if (!resident)
-      throw new NotFoundException("Resident not found in this household");
 
     // Không cho phép xóa chủ hộ
     if (household.headID === residentId)
@@ -104,18 +68,7 @@ export class HouseHoldService {
 
     return this.residentService.deleteResident(residentId);
   }
-  async updateMember(userId: number, residentId: number, dto: Partial<CreateResidentDto>) {
-    const household = await this.prisma.houseHolds.findFirst({ where: { userID: userId } });
-    if (!household)
-      throw new NotFoundException("Household with this userId not found");
-
-    // Kiểm tra resident có thuộc household này không
-    const resident = await this.prisma.resident.findFirst({
-      where: { id: residentId, houseHoldId: household.id }
-    });
-    if (!resident)
-      throw new NotFoundException("Resident not found in this household");
-
+  async updateMember(userId: number, residentId: number, dto: Partial<CreateResidentDto>){
     return this.residentService.updateResident(residentId, dto);
   }
 }

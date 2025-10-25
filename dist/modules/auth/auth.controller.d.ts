@@ -11,10 +11,11 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
-            id: number;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;
@@ -24,10 +25,11 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
-            id: number;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;
@@ -37,10 +39,11 @@ export declare class AuthController {
             email: string;
             password: string;
             role: import("@prisma/client").$Enums.Role;
-            id: number;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;

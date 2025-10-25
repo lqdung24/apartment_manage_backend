@@ -22,6 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new Error('Invalid token'); // sẽ bị catch bởi AuthGuard
     }
-    return { id: user.id, role: user.role }; // gắn vào req.user
+
+    return { id: user.id, role: user.role, householdId: user.householdId }; // gắn vào req.user
   }
 }

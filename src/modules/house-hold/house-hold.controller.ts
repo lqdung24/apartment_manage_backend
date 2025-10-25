@@ -27,7 +27,7 @@ export class HouseHoldController {
   @Get('member')
   @UseGuards(AuthGuard('jwt'))
   getResidentByHouseHoldId(@Req() req){
-    return this.houseHoldService.getMember(req.user.id);
+    return this.houseHoldService.getAllMember(req.user.houseHoldId);
   }
 
   @Patch('member/:residentId')
