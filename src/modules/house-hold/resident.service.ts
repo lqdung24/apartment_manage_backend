@@ -1,6 +1,7 @@
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Injectable} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateResidentDto} from "./dto/create-resident.dto";
+import {RelationshipToHead} from "@prisma/client";
 
 @Injectable()
 export class ResidentService {
@@ -33,10 +34,27 @@ export class ResidentService {
       where: { houseHoldId }
     });
   }
-  async deleteResident(id: number){
-    return this.prisma.resident.delete({ where: { id } });
+  async deleteResident(id: number, householdId: number){
+    const res = await this.prisma.resident.findFirst({
+      where: {id, houseHoldId: householdId}
+    })
+
+    if(!res)
+        throw new ForbiddenException('You are not allow to delete this resident')
+
+    if(res.relationshipToHead == RelationshipToHead.HEAD)
+      throw new BadRequestException('The head of household cannot be deleted');
+
+    return this.prisma.resident.delete({
+      where: { id },
+    });
   }
-  async updateResident(id: number, dto: Partial<CreateResidentDto>){
+  async updateResident(id: number, householdId: number,dto: Partial<CreateResidentDto>){
+    const res = await this.prisma.resident.findFirst({
+      where: {id, houseHoldId: householdId}
+    })
+    if(!res)
+      throw new ForbiddenException('You are not allow to update this resident')
     // Chuyển đổi dateOfBirth sang Date nếu tồn tại
     let updateData = { ...dto };
     if (dto.dateOfBirth) {
@@ -44,5 +62,4 @@ export class ResidentService {
     }
     return this.prisma.resident.update({ where: { id }, data: updateData });
   }
-  
 }

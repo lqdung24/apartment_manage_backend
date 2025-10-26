@@ -5,7 +5,7 @@ import { PrismaService } from '../../shared/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private prisma: PrismaService, private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(), //phuong thuc lay token

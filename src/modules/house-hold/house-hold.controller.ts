@@ -2,7 +2,7 @@ import {Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req} from 
 import { HouseHoldService } from './house-hold.service';
 import {AuthGuard} from "@nestjs/passport";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
-import {CreateResidentDto} from "../resident/dto/create-resident.dto";
+import {CreateResidentDto} from "./dto/create-resident.dto";
 
 @Controller('house-hold')
 export class HouseHoldController {
@@ -11,7 +11,7 @@ export class HouseHoldController {
   @Post()
   @UseGuards(AuthGuard('jwt'))
   create(@Req() req,@Body() dto: CreateHouseHoldAndHeadDto) {
-    return this.houseHoldService.createHouseHoldWithUserAndResident(req.user.id, dto);
+    return this.houseHoldService.createWithUserAndResident(req.user.id, dto);
   }
 
   @Post('addmember')
@@ -22,7 +22,7 @@ export class HouseHoldController {
   @Get()
   @UseGuards(AuthGuard('jwt'))
   getHouseHold(@Req() req){
-    return this.houseHoldService.getHouseHoldByUserId(req.user.id);
+    return req.user.houseHoldId
   }
   @Get('member')
   @UseGuards(AuthGuard('jwt'))
@@ -42,7 +42,7 @@ export class HouseHoldController {
 
   @Delete('member/:residentId')
   @UseGuards(AuthGuard('jwt'))
-  removeHouseMember(@Req() req, @Param('residentId') residentId: string) {
-    return this.houseHoldService.removeMember(req.user.id, Number(residentId));
+  deleteHouseMember(@Req() req, @Param('residentId') residentId: string) {
+    return this.houseHoldService.deleteMember(req.user.householdId, Number(residentId));
   }
 }

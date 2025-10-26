@@ -9,7 +9,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthModule = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
-const jwt_strategy_1 = require("./jwt.strategy");
+const access_token_strategy_1 = require("./access-token.strategy");
 const auth_service_1 = require("./auth.service");
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const auth_controller_1 = require("./auth.controller");
@@ -21,7 +21,7 @@ exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
         imports: [passport_1.PassportModule, mail_module_1.MailModule],
-        providers: [auth_service_1.AuthService, jwt_strategy_1.JwtStrategy, prisma_service_1.PrismaService, refresh_token_strategy_1.RefreshTokenStrategy],
+        providers: [auth_service_1.AuthService, access_token_strategy_1.AccessTokenStrategy, prisma_service_1.PrismaService, refresh_token_strategy_1.RefreshTokenStrategy],
         controllers: [auth_controller_1.AuthController],
         exports: [auth_service_1.AuthService],
     })
