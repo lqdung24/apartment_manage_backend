@@ -10,15 +10,12 @@ export class ResidentService {
   async createResident(dto: CreateResidentDto){
     // convert string "YYYY-MM-DD" sang Date object
     const dob = new Date(dto.dateOfBirth);
-
-    const resident = await this.prisma.resident.create({
+    return this.prisma.resident.create({
       data: {
         ...dto,
         dateOfBirth: dob,
       },
     });
-
-    return resident;
   }
 
   async assignHouseHold(id: number, houseHoldId: number){
