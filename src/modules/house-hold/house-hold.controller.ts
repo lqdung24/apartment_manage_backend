@@ -17,17 +17,17 @@ export class HouseHoldController {
   @Post('addmember')
   @UseGuards(AuthGuard('jwt'))
   addHouseMember(@Req() req, @Body() dto: CreateResidentDto){
-    return this.houseHoldService.addHouseMember(req.user.id, dto);
+    return this.houseHoldService.addHouseMember(req.user.householdId, dto);
   }
   @Get()
   @UseGuards(AuthGuard('jwt'))
   getHouseHold(@Req() req){
-    return req.user.houseHoldId
+    return this.houseHoldService.getHouseholdId(req.user.id)
   }
   @Get('member')
   @UseGuards(AuthGuard('jwt'))
   getResidentByHouseHoldId(@Req() req){
-    return this.houseHoldService.getAllMember(req.user.houseHoldId);
+    return this.houseHoldService.getAllMember(req.user.householdId);
   }
 
   @Patch('member/:residentId')
@@ -37,12 +37,12 @@ export class HouseHoldController {
     @Param('residentId') residentId: string,
     @Body() dto: Partial<CreateResidentDto>
   ) {
-    return this.houseHoldService.updateMember(req.user.id, Number(residentId), dto);
+    return this.houseHoldService.updateMember(Number(residentId), req.user.householdId, dto);
   }
 
   @Delete('member/:residentId')
   @UseGuards(AuthGuard('jwt'))
   deleteHouseMember(@Req() req, @Param('residentId') residentId: string) {
-    return this.houseHoldService.deleteMember(req.user.householdId, Number(residentId));
+    return this.houseHoldService.deleteMember(Number(residentId), req.user.householdId);
   }
 }

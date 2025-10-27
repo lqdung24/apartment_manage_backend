@@ -16,6 +16,7 @@ export class HouseHoldService {
   async createWithUserAndResident(userId: number, dto: CreateHouseHoldAndHeadDto) {
     //flow: tạo resident -> household (với user và resident đã tạo)
     // liên kết resident với house hold
+    dto.resident.relationshipToHead = RelationshipToHead.HEAD
     const resident = await this.residentService.createResident(dto.resident);
 
     const household = await this.prisma.houseHolds.create({
@@ -43,7 +44,8 @@ export class HouseHoldService {
       where: { id: householdId }
     })
     if(!household)
-      throw new NotFoundException("Household with this id not found")
+      throw new NotFoundException(`Household with id ${householdId} not found`)
+
     if(household.headID && dto.relationshipToHead == RelationshipToHead.HEAD)
       throw new ConflictException("This Household already has head")
     dto.houseHoldId = householdId;
@@ -52,11 +54,11 @@ export class HouseHoldService {
   async getAllMember(householdId: number){
     return this.residentService.getResidentByHouseHoldId(householdId)
   }
-  async deleteMember(householdId: number, residentId: number) {
+  async deleteMember(residentId: number, householdId: number) {
     // chỉ cho phép xóa thành viên trong hộ của mình
     return this.residentService.deleteResident(residentId, householdId);
   }
-  async updateMember(householdId: number, residentId: number, dto: Partial<CreateResidentDto>){
+  async updateMember(residentId: number, householdId: number, dto: Partial<CreateResidentDto>){
     const household = await this.prisma.houseHolds.findFirst({
       where: { id: householdId }
     })
@@ -67,5 +69,11 @@ export class HouseHoldService {
       throw new ConflictException("This Household already has head")
 
     return this.residentService.updateResident(residentId, householdId, dto);
+  }
+
+  async getHouseholdId(userID:number){
+    return this.prisma.houseHolds.findFirstOrThrow({
+      where: {userID}
+    })
   }
 }

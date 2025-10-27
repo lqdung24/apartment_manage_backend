@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import {Injectable, NotFoundException} from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../../shared/prisma/prisma.service';
@@ -20,7 +20,7 @@ export class AccessTokenStrategy extends PassportStrategy(Strategy, 'jwt') {
       where: { id: payload.id },
     });
     if (!user) {
-      throw new Error('Invalid token'); // sẽ bị catch bởi AuthGuard
+      throw new NotFoundException('Invalid token'); // sẽ bị catch bởi AuthGuard
     }
 
     return { id: user.id, role: user.role, householdId: user.householdId }; // gắn vào req.user

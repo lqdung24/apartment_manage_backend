@@ -32,14 +32,13 @@ export class ResidentService {
     });
   }
   async deleteResident(id: number, householdId: number){
-    const res = await this.prisma.resident.findFirst({
-      where: {id, houseHoldId: householdId}
+    const res = await this.prisma.resident.findFirstOrThrow({
+      where: {id}
     })
-
-    if(!res)
+    if(res.houseHoldId != householdId )
         throw new ForbiddenException('You are not allow to delete this resident')
 
-    if(res.relationshipToHead == RelationshipToHead.HEAD)
+    if(res!.relationshipToHead == RelationshipToHead.HEAD)
       throw new BadRequestException('The head of household cannot be deleted');
 
     return this.prisma.resident.delete({
@@ -48,12 +47,12 @@ export class ResidentService {
   }
   async updateResident(id: number, householdId: number,dto: Partial<CreateResidentDto>){
     const res = await this.prisma.resident.findFirst({
-      where: {id, houseHoldId: householdId}
+      where: {id}
     })
-    if(!res)
+    if(!res || res.houseHoldId != householdId)
       throw new ForbiddenException('You are not allow to update this resident')
     // Chuyển đổi dateOfBirth sang Date nếu tồn tại
-    let updateData = { ...dto };
+    let updateData: Partial<CreateResidentDto> = { ...dto };
     if (dto.dateOfBirth) {
       (updateData as any).dateOfBirth = new Date(dto.dateOfBirth);
     }
