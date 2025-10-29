@@ -1,10 +1,11 @@
-import {ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {ConflictException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
 import {CreateResidentDto} from "./dto/create-resident.dto";
 import {UserService} from "../user/user.service";
 import {ResidentService} from "./resident.service";
+import {CreateHouseHoldDto} from "./dto/create-house-hold.dto";
 
 @Injectable()
 export class HouseHoldService {
@@ -59,15 +60,6 @@ export class HouseHoldService {
     return this.residentService.deleteResident(residentId, householdId);
   }
   async updateMember(residentId: number, householdId: number, dto: Partial<CreateResidentDto>){
-    const household = await this.prisma.houseHolds.findFirst({
-      where: { id: householdId }
-    })
-    if(!household)
-      throw new NotFoundException("Household with this id not found")
-
-    if(household.headID && dto.relationshipToHead == RelationshipToHead.HEAD)
-      throw new ConflictException("This Household already has head")
-
     return this.residentService.updateResident(residentId, householdId, dto);
   }
 
@@ -75,5 +67,39 @@ export class HouseHoldService {
     return this.prisma.houseHolds.findFirstOrThrow({
       where: {userID}
     })
+  }
+
+  async updateHousehold(id: number, data: Partial<CreateHouseHoldDto>){
+    const oldHousehold = await this.prisma.houseHolds.findFirstOrThrow({
+      where:{id}
+    })
+    data.headID = Number(data.headID)
+    //neu update chu ho
+    if(data.headID != undefined && oldHousehold.headID != data.headID){
+      // data.headID = +data.headID
+      const resident = await this.prisma.resident.findFirstOrThrow({
+        where: {id: data.headID}
+      })
+
+      if(resident.houseHoldId != id){
+        throw new ForbiddenException("This residence is not in this household")
+      }
+      // resident hien tai thanh other
+      await this.prisma.resident.update({
+        where: {id: oldHousehold.headID},
+        data: {relationshipToHead: RelationshipToHead.OTHER}
+      })
+
+      const newHead = await this.prisma.resident.update({
+        where: {id: data.headID},
+        data:{relationshipToHead: RelationshipToHead.HEAD}
+      })
+    }
+    const updateHousehold = await this.prisma.houseHolds.update({
+      where: {id},
+      data: data
+    })
+
+    return updateHousehold
   }
 }

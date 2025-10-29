@@ -1,12 +1,13 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
 import { HouseHoldStatus } from '@prisma/client';
+import {Type} from "class-transformer";
 
 export class CreateHouseHoldDto {
   @IsNumber()
   @IsNotEmpty()
   houseHoldCode: number; // số hộ khẩu
 
-  @IsString()
+  @IsString()@Type(() => Number)
   @IsNotEmpty()
   apartmentNumber: string; // số căn hộ
 
@@ -24,5 +25,10 @@ export class CreateHouseHoldDto {
 
   @IsString()
   @IsNotEmpty()
-  province: string; // Tỉnh/Thành phố
+  province: string; // Tỉnh/Thành
+
+  @Type(() => Number)
+  @IsNumber()
+  @IsOptional()
+  headID?: number;
 }

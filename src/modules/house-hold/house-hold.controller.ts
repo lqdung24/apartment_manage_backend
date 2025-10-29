@@ -3,6 +3,7 @@ import { HouseHoldService } from './house-hold.service';
 import {AuthGuard} from "@nestjs/passport";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {CreateResidentDto} from "./dto/create-resident.dto";
+import {CreateHouseHoldDto} from "./dto/create-house-hold.dto";
 
 @Controller('house-hold')
 export class HouseHoldController {
@@ -45,4 +46,18 @@ export class HouseHoldController {
   deleteHouseMember(@Req() req, @Param('residentId') residentId: string) {
     return this.houseHoldService.deleteMember(Number(residentId), req.user.householdId);
   }
+
+  @Patch('update-head/:residentId')
+  @UseGuards(AuthGuard('jwt'))
+  changeHead(@Req() req, @Param('residentId') residentId: string){
+    return this.houseHoldService.changeHead(Number(residentId), req.user.householdId)
+  }
+
+  @Patch('update')
+  @UseGuards(AuthGuard('jwt'))
+  updateHousehold(@Req() req, @Body() dto: Partial<CreateHouseHoldDto>){
+    // console.log(dto)
+    return this.houseHoldService.updateHousehold(req.user.householdId, dto);
+  }
+
 }

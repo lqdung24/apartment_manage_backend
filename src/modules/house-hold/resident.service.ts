@@ -35,8 +35,9 @@ export class ResidentService {
     const res = await this.prisma.resident.findFirstOrThrow({
       where: {id}
     })
-    if(res.houseHoldId != householdId )
-        throw new ForbiddenException('You are not allow to delete this resident')
+    if(res.houseHoldId != householdId ) {
+      throw new ForbiddenException('You are not allow to delete this resident')
+    }
 
     if(res!.relationshipToHead == RelationshipToHead.HEAD)
       throw new BadRequestException('The head of household cannot be deleted');
@@ -51,6 +52,10 @@ export class ResidentService {
     })
     if(!res || res.houseHoldId != householdId)
       throw new ForbiddenException('You are not allow to update this resident')
+
+    if(res.relationshipToHead == RelationshipToHead.HEAD || dto.relationshipToHead == RelationshipToHead.HEAD)
+      throw new ForbiddenException('You can not change this relationship')
+
     // Chuyển đổi dateOfBirth sang Date nếu tồn tại
     let updateData: Partial<CreateResidentDto> = { ...dto };
     if (dto.dateOfBirth) {
