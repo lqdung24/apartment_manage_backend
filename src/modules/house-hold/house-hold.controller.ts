@@ -47,12 +47,6 @@ export class HouseHoldController {
     return this.houseHoldService.deleteMember(Number(residentId), req.user.householdId);
   }
 
-  @Patch('update-head/:residentId')
-  @UseGuards(AuthGuard('jwt'))
-  changeHead(@Req() req, @Param('residentId') residentId: string){
-    return this.houseHoldService.changeHead(Number(residentId), req.user.householdId)
-  }
-
   @Patch('update')
   @UseGuards(AuthGuard('jwt'))
   updateHousehold(@Req() req, @Body() dto: Partial<CreateHouseHoldDto>){
