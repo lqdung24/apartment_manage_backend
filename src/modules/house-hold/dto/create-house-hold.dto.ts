@@ -7,7 +7,7 @@ export class CreateHouseHoldDto {
   @IsNotEmpty()
   houseHoldCode: number; // số hộ khẩu
 
-  @IsString()@Type(() => Number)
+  @IsString()
   @IsNotEmpty()
   apartmentNumber: string; // số căn hộ
 

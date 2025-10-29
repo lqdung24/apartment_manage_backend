@@ -1,4 +1,4 @@
-import {ConflictException, ForbiddenException, Injectable, NotFoundException} from '@nestjs/common';
+import {ConflictException, ForbiddenException, Head, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
@@ -64,16 +64,31 @@ export class HouseHoldService {
   }
 
   async getHouseholdId(userID:number){
-    return this.prisma.houseHolds.findFirstOrThrow({
+    // return this.prisma.houseHolds.findFirstOrThrow({
+    //   where: {userID}
+    // })
+    const household = await this.prisma.houseHolds.findFirstOrThrow({
       where: {userID}
     })
+    const head = await this.prisma.resident.findFirstOrThrow({
+      where: {id: (household).headID}
+    })
+    return {household, head}
   }
 
   async updateHousehold(id: number, data: Partial<CreateHouseHoldDto>){
     const oldHousehold = await this.prisma.houseHolds.findFirstOrThrow({
       where:{id}
     })
-    data.headID = Number(data.headID)
+    //data.headID = Number(data.headID)
+     if (data.headID !== undefined && data.headID !== null) {
+        data.headID = Number(data.headID);
+
+    // nếu headID không hợp lệ => bỏ qua
+        if (isNaN(data.headID)) {
+          delete data.headID;
+        }
+    }
     //neu update chu ho
     if(data.headID != undefined && oldHousehold.headID != data.headID){
       // data.headID = +data.headID
