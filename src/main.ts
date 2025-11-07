@@ -4,6 +4,7 @@ import {ValidationPipe} from "@nestjs/common";
 import {AllExceptionsFilter} from "./common/filters/all-exceptions.filter";
 import {ResponseInterceptor} from "./common/interceptors/response.interceptor";
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
@@ -15,6 +16,8 @@ async function bootstrap() {
     origin: 'http://localhost:3030',
     credentials: true,
   });
+  // kich hoat adapter
+ app.useWebSocketAdapter(new IoAdapter(app));
 
   // cấu hình response
   app.useGlobalInterceptors(new ResponseInterceptor());

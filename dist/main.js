@@ -6,6 +6,7 @@ const common_1 = require("@nestjs/common");
 const all_exceptions_filter_1 = require("./common/filters/all-exceptions.filter");
 const response_interceptor_1 = require("./common/interceptors/response.interceptor");
 const swagger_1 = require("@nestjs/swagger");
+const platform_socket_io_1 = require("@nestjs/platform-socket.io");
 const cookieParser = require('cookie-parser');
 async function bootstrap() {
     const app = await core_1.NestFactory.create(app_module_1.AppModule, {
@@ -15,6 +16,7 @@ async function bootstrap() {
         origin: 'http://localhost:3030',
         credentials: true,
     });
+    app.useWebSocketAdapter(new platform_socket_io_1.IoAdapter(app));
     app.useGlobalInterceptors(new response_interceptor_1.ResponseInterceptor());
     app.use(cookieParser());
     app.useGlobalFilters(new all_exceptions_filter_1.AllExceptionsFilter());

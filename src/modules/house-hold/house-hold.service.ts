@@ -6,12 +6,14 @@ import {CreateResidentDto} from "./dto/create-resident.dto";
 import {UserService} from "../user/user.service";
 import {ResidentService} from "./resident.service";
 import {CreateHouseHoldDto} from "./dto/create-house-hold.dto";
+import { AdminGateway } from 'src/websocket/admin.gateway';
 
 @Injectable()
 export class HouseHoldService {
   constructor(private readonly prisma: PrismaService,
               private readonly residentService: ResidentService,
-              private readonly userService: UserService
+              private readonly userService: UserService,
+              private readonly adminGateway: AdminGateway
   ) {}
 
   async createWithUserAndResident(userId: number, dto: CreateHouseHoldAndHeadDto) {
@@ -37,6 +39,12 @@ export class HouseHoldService {
     await this.residentService.assignHouseHold(resident.id, household.id);
     resident.houseHoldId = household.id;
 
+    this.adminGateway.notifyHouseholdUpdated({
+      action: 'create',
+      household,
+      resident,
+    });
+
     return { household, resident }
   }
 
@@ -50,17 +58,37 @@ export class HouseHoldService {
     if(household.headID && dto.relationshipToHead == RelationshipToHead.HEAD)
       throw new ConflictException("This Household already has head")
     dto.houseHoldId = householdId;
-    return this.residentService.createResident(dto);
+    const newMember = await this.residentService.createResident(dto);
+    this.adminGateway.notifyHouseholdUpdated({
+      action:'add_member',
+      householdId,
+      resident: newMember,
+    })
+    return newMember;
   }
   async getAllMember(householdId: number){
     return this.residentService.getResidentByHouseHoldId(householdId)
   }
   async deleteMember(residentId: number, householdId: number) {
-    // chỉ cho phép xóa thành viên trong hộ của mình
-    return this.residentService.deleteResident(residentId, householdId);
+    const deleted = await this.residentService.deleteResident(residentId, householdId);
+
+    this.adminGateway.notifyHouseholdUpdated({
+      action: 'delete_member',
+      householdId,
+      residentId,
+    });
+
+    return deleted;
   }
   async updateMember(residentId: number, householdId: number, dto: Partial<CreateResidentDto>){
-    return this.residentService.updateResident(residentId, householdId, dto);
+    const updated = await this.residentService.updateResident(residentId, householdId, dto);
+    this.adminGateway.notifyHouseholdUpdated({
+      action: 'update_member',
+      householdId,
+      resident: updated,
+    });
+
+    return updated;
   }
 
   async getHouseholdId(userID:number){
@@ -115,6 +143,10 @@ export class HouseHoldService {
       data: data
     })
 
+    this.adminGateway.notifyHouseholdUpdated({
+      action:'update',
+      household: updateHousehold,
+    });
     return updateHousehold
   }
 }
