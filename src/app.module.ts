@@ -6,12 +6,16 @@ import {AuthModule} from "./modules/auth/auth.module";
 import { ConfigModule } from '@nestjs/config';
 import {HouseHoldModule} from "./modules/house-hold/house-hold.module";
 import { AdminModule } from './modules/admin/admin.module';
+import { FeeModule } from './modules/fee/fee.module';
+import { PaymentModule } from './modules/payment/payment.module';
 
 @Module({
   imports: [PrismaModule, UserModule, AuthModule,
     ConfigModule.forRoot({ isGlobal: true, }),
     HouseHoldModule,
     AdminModule,
+    FeeModule,
+    PaymentModule
   ],
 })
 export class AppModule implements NestModule{

@@ -13,9 +13,9 @@ export declare class AuthController {
             role: import("@prisma/client").$Enums.Role;
             id: number;
             householdId: number | null;
+            createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
-            createtime: Date;
         };
         accessToken: string;
     }>;
@@ -27,9 +27,9 @@ export declare class AuthController {
             role: import("@prisma/client").$Enums.Role;
             id: number;
             householdId: number | null;
+            createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
-            createtime: Date;
         };
         accessToken: string;
     }>;
@@ -41,9 +41,9 @@ export declare class AuthController {
             role: import("@prisma/client").$Enums.Role;
             id: number;
             householdId: number | null;
+            createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
-            createtime: Date;
         };
         accessToken: string;
     }>;
