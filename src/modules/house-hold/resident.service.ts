@@ -1,7 +1,8 @@
-import {BadRequestException, ForbiddenException, Injectable} from '@nestjs/common';
+import {BadRequestException, ForbiddenException, Injectable, UseGuards} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateResidentDto} from "./dto/create-resident.dto";
-import {RelationshipToHead} from "@prisma/client";
+import {RelationshipToHead, ResidenceStatus} from "@prisma/client";
+import {AuthGuard} from "@nestjs/passport";
 
 @Injectable()
 export class ResidentService {
@@ -28,7 +29,12 @@ export class ResidentService {
   async getResidentByHouseHoldId(houseHoldId: number){
     // Lấy tất cả resident có houseHoldId trùng với household.id
     return this.prisma.resident.findMany({
-      where: { houseHoldId }
+      where: {
+        houseHoldId,
+        residentStatus: {
+          in: ["NORMAL", "TEMP_ABSENT"]
+        }
+      }
     });
   }
   async deleteResident(id: number, householdId: number){
@@ -62,5 +68,21 @@ export class ResidentService {
       (updateData as any).dateOfBirth = new Date(dto.dateOfBirth);
     }
     return this.prisma.resident.update({ where: { id }, data: updateData });
+  }
+
+  async findResidentByNationalId(nationalId: string){
+    return this.prisma.resident.findFirstOrThrow({
+      where: {
+        nationalId: nationalId
+      }
+    })
+  }
+  async getResidentInHouseholdByStatus(householdId: number, status: ResidenceStatus[]){
+    return this.prisma.resident.findMany({
+      where: {
+        houseHoldId: householdId,
+        residentStatus: {in: status}
+      }
+    })
   }
 }

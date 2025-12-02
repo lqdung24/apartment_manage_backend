@@ -19,6 +19,11 @@ export declare class AuthService {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
         refreshToken: string;
@@ -34,6 +39,11 @@ export declare class AuthService {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
         refreshToken: string;
@@ -52,6 +62,11 @@ export declare class AuthService {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;

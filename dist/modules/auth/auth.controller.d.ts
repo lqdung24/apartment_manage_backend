@@ -16,6 +16,11 @@ export declare class AuthController {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;
@@ -30,6 +35,11 @@ export declare class AuthController {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;
@@ -44,6 +54,11 @@ export declare class AuthController {
             createtime: Date;
             resetToken: string | null;
             resetTokenExpiry: Date | null;
+            resetToken: string | null;
+            resetTokenExpiry: Date | null;
+            createtime: Date;
+            householdId: number | null;
+            id: number;
         };
         accessToken: string;
     }>;

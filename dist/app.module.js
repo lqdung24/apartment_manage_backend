@@ -17,6 +17,7 @@ const house_hold_module_1 = require("./modules/house-hold/house-hold.module");
 const admin_module_1 = require("./modules/admin/admin.module");
 const fee_module_1 = require("./modules/fee/fee.module");
 const payment_module_1 = require("./modules/payment/payment.module");
+const registration_module_1 = require("./modules/registration/registration.module");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -31,6 +32,7 @@ exports.AppModule = AppModule = __decorate([
             admin_module_1.AdminModule,
             fee_module_1.FeeModule,
             payment_module_1.PaymentModule
+            registration_module_1.RegistrationModule,
         ],
     })
 ], AppModule);

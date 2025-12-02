@@ -18,6 +18,26 @@ model Users {
   resetTokenExpiry DateTime?
   householdId      Int?        @unique
   HouseHolds       HouseHolds? @relation("account")
+  resetToken       String? // token reset
+  resetTokenExpiry DateTime? // thời hạn token
+  createtime       DateTime  @default(now())
+  householdId      Int?      @unique
+
+  HouseHolds               HouseHolds?         @relation("account") // tài khoản của hộ gia đình
+  TemporaryResidenceSubmit TemporaryResident[] @relation("tempResSubmit")
+  TemporaryResidenceReview TemporaryResident[] @relation("tempResReview")
+  TemporaryAbsenceSubmit   TemporaryAbsence[]  @relation("tempAbsenceSubmit")
+  TemporaryAbsenceReview   TemporaryAbsence[]  @relation("tempAbsenceReview")
+  RcSubmit                 ResidentChanges[]   @relation("RcSubmit")
+  RcReviews                ResidentChanges[]   @relation("RcReview")
+  HcSubmit                 HouseholdChanges[]  @relation("HcSubmit")
+  HcReview                 HouseholdChanges[]  @relation("HcReview")
+}
+
+enum Role {
+  USER
+  ADMIN
+  ACCOUNTANT
 }
 
 model HouseHolds {
@@ -36,6 +56,24 @@ model HouseHolds {
   head            Resident        @relation("headOfHouse", fields: [headID], references: [id])
   account         Users           @relation("account", fields: [userID], references: [id])
   resident        Resident[]      @relation("houseMembers")
+
+  headID Int      @unique // id chủ hộ
+  head   Resident @relation("headOfHouse", fields: [headID], references: [id])
+
+  resident Resident[] @relation("houseMembers") // nhân khẩu trong 1 hộ
+
+  userID  Int   @unique
+  account Users @relation("account", fields: [userID], references: [id]) // một hộ có 1 tài khoản
+
+  FeeAssignment FeeAssignment[]
+
+  TemporaryResidence TemporaryResident[] @relation("tempaResHousehold")
+}
+
+enum HouseHoldStatus {
+  ACTIVE
+  MOVED
+  DELETE
 }
 
 model Resident {
@@ -126,12 +164,31 @@ enum HouseHoldStatus {
   ACTIVE
   MOVED
   DELETE
+  residentStatus     ResidenceStatus    @default(NORMAL)
+  informationStatus  InformationStatus  @default(PENDING)
+  houseHoldId        Int? // hộ khẩu
+
+  houseHold   HouseHolds? @relation("houseMembers", fields: [houseHoldId], references: [id])
+  headedHouse HouseHolds? @relation("headOfHouse")
+  TemporaryResidence TemporaryResident[] @relation("tempResidence")
+  TemporaryAbsence   TemporaryAbsence[]  @relation("tempAbsence")
+  ResidentChanges ResidentChanges[] @relation("residentChange")
+  HouseholdChanges HouseholdChanges[] @relation("householdChange")
 }
 
 enum ResidenceStatus {
   NORMAL
   TEMP_ABSENT
+  TEMP_RESIDENT
   MOVE_OUT
+}
+
+enum InformationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  DELETED
+  ENDED
 }
 
 enum Gender {
@@ -150,6 +207,83 @@ enum RelationshipToHead {
   OTHER
 }
 
+model TemporaryResident {
+  id                Int               @id @default(autoincrement())
+  residentId        Int
+  householdId       Int
+  startDate         DateTime
+  endDate           DateTime
+  reason            String
+  address           String
+  informationStatus InformationStatus @default(PENDING)
+  submittedUserId   Int
+  submittedAt       DateTime          @default(now())
+  reviewedAdminId   Int?
+  reviewedAt        DateTime?
+
+  household     HouseHolds @relation("tempaResHousehold", fields: [householdId], references: [id])
+  resident      Resident   @relation("tempResidence", fields: [residentId], references: [id])
+  submittedUser Users      @relation("tempResSubmit", fields: [submittedUserId], references: [id])
+  reviewedAdmin Users?     @relation("tempResReview", fields: [reviewedAdminId], references: [id])
+}
+
+model TemporaryAbsence {
+  id                Int               @id @default(autoincrement())
+  residentId        Int
+  startDate         DateTime
+  endDate           DateTime
+  reason            String
+  destination       String // Nơi đến tạm vắng
+  informationStatus InformationStatus @default(PENDING)
+  submittedUserId   Int
+  submittedAt       DateTime          @default(now())
+  reviewedAdminId   Int?
+  reviewedAt        DateTime?
+
+  resident      Resident @relation("tempAbsence", fields: [residentId], references: [id])
+  submittedUser Users    @relation("tempAbsenceSubmit", fields: [submittedUserId], references: [id])
+  reviewedAdmin Users?   @relation("tempAbsenceReview", fields: [reviewedAdminId], references: [id])
+}
+
+model ResidentChanges {
+  id            Int       @id @default(autoincrement())
+  residentId    Int
+  action        Actions
+  oldData       Json?
+  newData       Json?
+  submitUserId  Int
+  submitAt      DateTime  @default(now())
+  reviewAdminId Int?
+  reviewAt      DateTime?
+
+  resident      Resident @relation("residentChange", fields: [residentId], references: [id])
+  submittedUser Users    @relation("RcSubmit", fields: [submitUserId], references: [id])
+  reviewedAdmin Users?   @relation("RcReview", fields: [reviewAdminId], references: [id])
+}
+
+model HouseholdChanges {
+  id            Int       @id @default(autoincrement())
+  householdId   Int
+  action        Actions
+  oldData       Json?
+  newData       Json?
+  submitUserId  Int
+  submitAt      DateTime  @default(now())
+  reviewAdminId Int?
+  reviewAt      DateTime?
+
+  resident      Resident @relation("householdChange", fields: [householdId], references: [id])
+  submittedUser Users    @relation("HcSubmit", fields: [submitUserId], references: [id])
+  reviewedAdmin Users?   @relation("HcReview", fields: [reviewAdminId], references: [id])
+}
+
+enum Actions {
+  CREATE
+  DELETE
+  UPDATE
+}
+
+// fee
 enum FeeType {
   MANDATORY
   VOLUNTARY

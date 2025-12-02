@@ -8,6 +8,14 @@ import {UpdateUserRoleDto} from "./dto/update-user-role.dto";
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  async createUser(dto: CreateUserDto){
+    return this.prisma.users.create({
+      data:{
+        ...dto
+      }
+    })
+  }
   async updateHouseholdId(id: number, householdId: number){
     return this.prisma.users.update({
       where: {id},
