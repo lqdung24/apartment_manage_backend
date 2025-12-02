@@ -17,6 +17,13 @@ let UserService = class UserService {
     constructor(prisma) {
         this.prisma = prisma;
     }
+    async createUser(dto) {
+        return this.prisma.users.create({
+            data: {
+                ...dto
+            }
+        });
+    }
     async updateHouseholdId(id, householdId) {
         return this.prisma.users.update({
             where: { id },

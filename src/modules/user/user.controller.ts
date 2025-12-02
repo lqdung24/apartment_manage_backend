@@ -22,10 +22,10 @@ import { Role } from '@prisma/client';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  // @Post()
-  // create(@Body() data: CreateUserDto) {
-  //   return this.userService.create(data);
-  // }
+  @Post()
+  create(@Body() data: CreateUserDto) {
+    return this.userService.createUser(data);
+  }
   //
   // @Get()
   // findAll() {
