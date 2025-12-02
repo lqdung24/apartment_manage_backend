@@ -31,7 +31,7 @@ exports.AppModule = AppModule = __decorate([
             house_hold_module_1.HouseHoldModule,
             admin_module_1.AdminModule,
             fee_module_1.FeeModule,
-            payment_module_1.PaymentModule
+            payment_module_1.PaymentModule,
             registration_module_1.RegistrationModule,
         ],
     })

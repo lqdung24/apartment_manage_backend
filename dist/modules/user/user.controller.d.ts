@@ -9,13 +9,10 @@ export declare class UserController {
         email: string;
         password: string;
         role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
         resetToken: string | null;
         resetTokenExpiry: Date | null;
-        createtime: Date;
         householdId: number | null;
-        createtime: Date;
-        resetToken: string | null;
-        resetTokenExpiry: Date | null;
         id: number;
     }>;
     updateRole(id: number, dto: UpdateUserRoleDto): Promise<{
@@ -23,9 +20,9 @@ export declare class UserController {
         email: string;
         password: string;
         role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
         resetToken: string | null;
         resetTokenExpiry: Date | null;
-        createtime: Date;
         householdId: number | null;
         id: number;
     }>;

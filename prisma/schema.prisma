@@ -18,12 +18,6 @@ model Users {
   resetTokenExpiry DateTime?
   householdId      Int?        @unique
   HouseHolds       HouseHolds? @relation("account")
-  resetToken       String? // token reset
-  resetTokenExpiry DateTime? // thời hạn token
-  createtime       DateTime  @default(now())
-  householdId      Int?      @unique
-
-  HouseHolds               HouseHolds?         @relation("account") // tài khoản của hộ gia đình
   TemporaryResidenceSubmit TemporaryResident[] @relation("tempResSubmit")
   TemporaryResidenceReview TemporaryResident[] @relation("tempResReview")
   TemporaryAbsenceSubmit   TemporaryAbsence[]  @relation("tempAbsenceSubmit")
@@ -57,15 +51,6 @@ model HouseHolds {
   account         Users           @relation("account", fields: [userID], references: [id])
   resident        Resident[]      @relation("houseMembers")
 
-  headID Int      @unique // id chủ hộ
-  head   Resident @relation("headOfHouse", fields: [headID], references: [id])
-
-  resident Resident[] @relation("houseMembers") // nhân khẩu trong 1 hộ
-
-  userID  Int   @unique
-  account Users @relation("account", fields: [userID], references: [id]) // một hộ có 1 tài khoản
-
-  FeeAssignment FeeAssignment[]
 
   TemporaryResidence TemporaryResident[] @relation("tempaResHousehold")
 }
@@ -77,10 +62,10 @@ enum HouseHoldStatus {
 }
 
 model Resident {
-  id                 Int                  @id @default(autoincrement())
-  nationalId         String               @unique
-  phoneNumber        String               @unique
-  email              String               @unique
+  id                 Int                @id @default(autoincrement())
+  nationalId         String             @unique // cccd
+  phoneNumber        String             @unique
+  email              String             @unique
   fullname           String
   dateOfBirth        DateTime
   gender             Gender
@@ -88,12 +73,16 @@ model Resident {
   placeOfOrigin      String
   occupation         String
   workingAdress      String
+  residentStatus     ResidenceStatus    @default(NORMAL)
+  informationStatus  InformationStatus  @default(PENDING)
   houseHoldId        Int?
-  residencStatus     ResidenceStatus      @default(NORMAL)
-  headedHouse        HouseHolds?          @relation("headOfHouse")
-  houseHold          HouseHolds?          @relation("houseMembers", fields: [houseHoldId], references: [id])
-  TemporaryAbsence   TemporaryAbsence[]
-  TemporaryResidence TemporaryResidence[]
+
+  houseHold   HouseHolds? @relation("houseMembers", fields: [houseHoldId], references: [id])
+  headedHouse HouseHolds? @relation("headOfHouse")
+  TemporaryResidence TemporaryResident[] @relation("tempResidence")
+  TemporaryAbsence   TemporaryAbsence[]  @relation("tempAbsence")
+  ResidentChanges ResidentChanges[] @relation("residentChange")
+  HouseholdChanges HouseholdChanges[] @relation("householdChange")
 }
 
 model Fee {
@@ -132,48 +121,6 @@ model Payment {
   paidDate         DateTime      @default(now())
   note            String?
   FeeAssignment   FeeAssignment @relation(fields: [feeAssignmentId], references: [id])
-}
-
-model TemporaryAbsence {
-  id          Int       @id @default(autoincrement())
-  residentId  Int
-  startDate   DateTime
-  endDate     DateTime?
-  reason      String?
-  destination String?
-  Resident    Resident  @relation(fields: [residentId], references: [id])
-}
-
-model TemporaryResidence {
-  id         Int       @id @default(autoincrement())
-  residentId Int
-  startDate  DateTime
-  endDate    DateTime?
-  reason     String?
-  address    String
-  Resident   Resident  @relation(fields: [residentId], references: [id])
-}
-
-enum Role {
-  USER
-  ADMIN
-  ACCOUNTANT
-}
-
-enum HouseHoldStatus {
-  ACTIVE
-  MOVED
-  DELETE
-  residentStatus     ResidenceStatus    @default(NORMAL)
-  informationStatus  InformationStatus  @default(PENDING)
-  houseHoldId        Int? // hộ khẩu
-
-  houseHold   HouseHolds? @relation("houseMembers", fields: [houseHoldId], references: [id])
-  headedHouse HouseHolds? @relation("headOfHouse")
-  TemporaryResidence TemporaryResident[] @relation("tempResidence")
-  TemporaryAbsence   TemporaryAbsence[]  @relation("tempAbsence")
-  ResidentChanges ResidentChanges[] @relation("residentChange")
-  HouseholdChanges HouseholdChanges[] @relation("householdChange")
 }
 
 enum ResidenceStatus {
@@ -293,11 +240,4 @@ enum FeeFrequency {
   ONE_TIME
   MONTHLY
   YEARLY
-}
-
-enum InformationStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  DELETED
 }

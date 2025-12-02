@@ -16,7 +16,7 @@ import {RegistrationModule} from "./modules/registration/registration.module";
     HouseHoldModule,
     AdminModule,
     FeeModule,
-    PaymentModule
+    PaymentModule,
     RegistrationModule,
   ],
 })
