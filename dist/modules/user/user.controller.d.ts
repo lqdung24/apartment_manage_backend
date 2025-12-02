@@ -13,6 +13,9 @@ export declare class UserController {
         resetTokenExpiry: Date | null;
         createtime: Date;
         householdId: number | null;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         id: number;
     }>;
     updateRole(id: number, dto: UpdateUserRoleDto): Promise<{

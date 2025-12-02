@@ -6,6 +6,8 @@ import {AuthModule} from "./modules/auth/auth.module";
 import { ConfigModule } from '@nestjs/config';
 import {HouseHoldModule} from "./modules/house-hold/house-hold.module";
 import { AdminModule } from './modules/admin/admin.module';
+import { FeeModule } from './modules/fee/fee.module';
+import { PaymentModule } from './modules/payment/payment.module';
 import {RegistrationModule} from "./modules/registration/registration.module";
 
 @Module({
@@ -13,6 +15,8 @@ import {RegistrationModule} from "./modules/registration/registration.module";
     ConfigModule.forRoot({ isGlobal: true, }),
     HouseHoldModule,
     AdminModule,
+    FeeModule,
+    PaymentModule
     RegistrationModule,
   ],
 })

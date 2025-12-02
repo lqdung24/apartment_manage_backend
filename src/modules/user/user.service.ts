@@ -28,4 +28,9 @@ export class UserService {
       data: {role: dto.role}
     })
   }
+  async create(dto:CreateUserDto){
+    return this.prisma.users.create({
+      data: dto
+    })
+  }
 }

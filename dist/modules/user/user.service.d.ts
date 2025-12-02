@@ -13,6 +13,9 @@ export declare class UserService {
         resetTokenExpiry: Date | null;
         createtime: Date;
         householdId: number | null;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         id: number;
     }>;
     updateHouseholdId(id: number, householdId: number): Promise<{
@@ -31,9 +34,22 @@ export declare class UserService {
         email: string;
         password: string;
         role: import("@prisma/client").$Enums.Role;
+        id: number;
+        householdId: number | null;
+        createtime: Date;
         resetToken: string | null;
         resetTokenExpiry: Date | null;
+    }>;
+    create(dto: CreateUserDto): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        id: number;
+        householdId: number | null;
         createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
         householdId: number | null;
         id: number;
     }>;

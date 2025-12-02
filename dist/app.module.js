@@ -15,6 +15,8 @@ const auth_module_1 = require("./modules/auth/auth.module");
 const config_1 = require("@nestjs/config");
 const house_hold_module_1 = require("./modules/house-hold/house-hold.module");
 const admin_module_1 = require("./modules/admin/admin.module");
+const fee_module_1 = require("./modules/fee/fee.module");
+const payment_module_1 = require("./modules/payment/payment.module");
 const registration_module_1 = require("./modules/registration/registration.module");
 let AppModule = class AppModule {
     configure(consumer) {
@@ -28,6 +30,8 @@ exports.AppModule = AppModule = __decorate([
             config_1.ConfigModule.forRoot({ isGlobal: true, }),
             house_hold_module_1.HouseHoldModule,
             admin_module_1.AdminModule,
+            fee_module_1.FeeModule,
+            payment_module_1.PaymentModule
             registration_module_1.RegistrationModule,
         ],
     })

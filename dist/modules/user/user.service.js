@@ -36,6 +36,11 @@ let UserService = class UserService {
             data: { role: dto.role }
         });
     }
+    async create(dto) {
+        return this.prisma.users.create({
+            data: dto
+        });
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
