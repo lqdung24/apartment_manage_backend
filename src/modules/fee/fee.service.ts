@@ -90,15 +90,32 @@ export class FeeService {
       include: { resident: true },
     });
 
-    const data = households.map(h => ({
-      feeId: dto.feeId,
-      householdId: h.id,
-      amountDue: (h.resident.length * (fee.ratePerPerson ?? 0)) + (fee.minium ?? 0),
-      dueDate: new Date(dto.dueDate),
-    }));
+    const existingAssignments = await this.prisma.feeAssignment.findMany({
+      where: {
+        feeId: dto.feeId,
+        householdId: { in: dto.householdIds }
+      },
+      select: { householdId: true }
+    });
 
-    return this.prisma.feeAssignment.createMany({ data });
+    const existingHouseholdIds = new Set(existingAssignments.map(a => a.householdId));
+
+    const newAssignmentsData = households
+      .filter(h => !existingHouseholdIds.has(h.id)) 
+      .map(h => ({
+        feeId: dto.feeId,
+        householdId: h.id,
+        amountDue: (h.resident.length * (fee.ratePerPerson ?? 0)) + (fee.minium ?? 0),
+        dueDate: new Date(dto.dueDate),
+      }));
+
+    if (newAssignmentsData.length === 0) {
+       return { count: 0, message: "Tất cả các hộ chọn đều đã được gán phí này rồi." };
+    }
+
+    return this.prisma.feeAssignment.createMany({ data: newAssignmentsData });
   }
+  
   async getFeeDetail(feeId: number) {
     return this.prisma.fee.findUnique({
       where: { id: feeId },
