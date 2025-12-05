@@ -1,134 +1,111 @@
-body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f9fbfd;
-}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quản lý tạm trú - tạm vắng</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
 
-.container {
-    padding: 20px;
-    padding-bottom: 90px;
-}
+<div class="flex h-screen">
 
-/* Tabs */
-.tabs {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-}
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-md flex flex-col">
+        <h2 class="text-xl font-bold p-4 border-b">Quản lý cư trú</h2>
 
-.tab {
-    padding: 8px 15px;
-    background: #eef2f8;
-    color: #6a6f77;
-    border-radius: 20px;
-    font-size: 14px;
-}
+        <nav class="flex-1">
+            <button id="tab-tamtru" class="w-full text-left px-4 py-3 hover:bg-gray-200 font-medium">
+                Tạm trú
+            </button>
+            <button id="tab-tamvang" class="w-full text-left px-4 py-3 hover:bg-gray-200 font-medium">
+                Tạm vắng
+            </button>
+        </nav>
+    </aside>
 
-.tab.active {
-    background: #dfeaff;
-    color: #3f7cff;
-    font-weight: bold;
-}
+    <!-- Main Content -->
+    <main class="flex-1 p-6">
 
-.tab.menu {
-    margin-left: auto;
-}
+        <!-- Sub Tabs -->
+        <div class="flex gap-4 border-b pb-2 mb-4">
+            <button class="subtab font-medium pb-2 border-b-2 border-blue-500" data-type="pending">
+                Duyệt đơn
+            </button>
+            <button class="subtab font-medium pb-2" data-type="active">
+                Hiện tại
+            </button>
+            <button class="subtab font-medium pb-2" data-type="history">
+                Lịch sử
+            </button>
+        </div>
 
-/* Section title */
-.section-title {
-    margin-top: 25px;
-    font-size: 16px;
-    color: #4a4d52;
-}
+        <!-- Title -->
+        <h1 id="title" class="text-2xl font-bold mb-4">Tạm trú - Duyệt đơn</h1>
 
-/* Task list */
-.task-list {
-    margin-top: 10px;
-}
+        <!-- Table -->
+        <div class="bg-white shadow rounded p-4">
+            <table class="min-w-full text-left">
+                <thead>
+                <tr class="border-b">
+                    <th class="py-2">ID</th>
+                    <th class="py-2">Họ tên</th>
+                    <th class="py-2">Ngày gửi</th>
+                    <th class="py-2">Trạng thái</th>
+                    <th class="py-2">Hành động</th>
+                </tr>
+                </thead>
+                <tbody id="table-content">
+                <tr class="border-b text-gray-700">
+                    <td class="py-2">1</td>
+                    <td class="py-2">Nguyễn Văn A</td>
+                    <td class="py-2">2025-10-12</td>
+                    <td class="py-2">PENDING</td>
+                    <td class="py-2 text-blue-600">Duyệt / Từ chối</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
 
-.task {
-    background: #f3f6fa;
-    padding: 15px;
-    border-radius: 12px;
-    margin-bottom: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
+    </main>
+</div>
 
-.task .left {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
+<script>
+    const title = document.getElementById("title");
+    const subtabs = document.querySelectorAll(".subtab");
+    const table = document.getElementById("table-content");
 
-.check {
-    width: 22px;
-    height: 22px;
-    border-radius: 50%;
-    background: #d6e3f3;
-    border: 2px solid #b6c6dd;
-    position: relative;
-}
+    let currentMainTab = "Tạm trú";
 
-.task.done .check {
-    background: #cde0ff;
-}
+    // 2 tabs lớn
+    document.getElementById("tab-tamtru").onclick = () => {
+        currentMainTab = "Tạm trú";
+        updateTitle();
+    };
+    document.getElementById("tab-tamvang").onclick = () => {
+        currentMainTab = "Tạm vắng";
+        updateTitle();
+    };
 
-.task.done .text {
-    text-decoration: line-through;
-    color: #9aa2ab;
-}
+    // 3 subtabs
+    subtabs.forEach(btn => {
+        btn.onclick = () => {
+            subtabs.forEach(s => s.classList.remove("border-blue-500"));
+            btn.classList.add("border-blue-500");
 
-.flag {
-    opacity: 0.3;
-    font-size: 18px;
-}
+            updateTitle(btn.dataset.type);
+        };
+    });
 
-/* Link */
-.link {
-    display: block;
-    margin-top: 10px;
-    color: #6b7cff;
-    text-align: center;
-    font-size: 14px;
-}
+    function updateTitle(sub = "pending") {
+        let subText =
+            sub === "pending" ? "Duyệt đơn" :
+                sub === "active" ? "Hiện tại" :
+                    "Lịch sử";
 
-/* Floating button */
-.float-btn {
-    position: fixed;
-    bottom: 75px;
-    right: 25px;
-    width: 55px;
-    height: 55px;
-    background: #5595ff;
-    color: #fff;
-    border-radius: 50%;
-    font-size: 32px;
-    text-align: center;
-    line-height: 55px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.25);
-}
+        title.innerText = `${currentMainTab} - ${subText}`;
+    }
+</script>
 
-/* Bottom Navigation */
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    background: #ffffff;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    border-top: 1px solid #e4e4e4;
-}
-
-.bottom-nav .item {
-    font-size: 22px;
-    opacity: 0.4;
-}
-
-.bottom-nav .item.active {
-    opacity: 1;
-    color: #3f7cff;
-}
+</body>
+</html>

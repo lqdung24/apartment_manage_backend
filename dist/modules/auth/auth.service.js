@@ -69,7 +69,7 @@ let AuthService = class AuthService {
             expiresIn: '15m',
         });
         const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
-            expiresIn: '1d',
+            expiresIn: '7d',
         });
         return { user, accessToken, refreshToken };
     }
@@ -84,7 +84,7 @@ let AuthService = class AuthService {
             expiresIn: '15m',
         });
         const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
-            expiresIn: '1d',
+            expiresIn: '7d',
         });
         return { user, accessToken, refreshToken };
     }
