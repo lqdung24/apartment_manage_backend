@@ -24,7 +24,7 @@ export class PaymentService {
         }
 
         if(oldPayment && oldPayment.status === 'REJECTED'){
-            if(oldPayment.imagePath){
+            if(oldPayment.imagePath && oldPayment.imagePath !== dto.imagePath){
                 try {
                     await this.uploadService.deleteImage(oldPayment.imagePath);
                 } catch(err) {
