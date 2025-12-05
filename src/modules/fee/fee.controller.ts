@@ -9,40 +9,46 @@ import { RolesGuard } from 'src/common/guards/roles.guard';
 
 @Controller('fee')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
-@Roles ('ADMIN')
 export class FeeController {
   constructor(private readonly feeService: FeeService) {}
- 
+
+  @Roles ('ADMIN')
   @Post()
   create(@Body() createFeeDto: CreateFeeDto) {
     return this.feeService.create(createFeeDto);
   }
 
+  @Roles ('ADMIN')
   @Get()
   findAll() {
     return this.feeService.findAll();
   }
 
+  @Roles ('ADMIN')
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
       return this.feeService.findOne(id);
   }
 
+  @Roles ('ADMIN')
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<CreateFeeDto>) {
     return this.feeService.update(Number(id), dto);
   }
 
+  @Roles ('ADMIN')
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.feeService.remove(Number(id));
   }
 
+  @Roles ('ADMIN')
   @Post('assign')
   assign(@Body() dto: CreateFeeAssignmentDto) {
     return this.feeService.assignFee(dto);
   }
-
+  
+  @Roles ('ADMIN')
   @Get(':id/detail')
   detail(@Param('id') id: string) {
     return this.feeService.getFeeDetail(Number(id));
