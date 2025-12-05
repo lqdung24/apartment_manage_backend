@@ -39,7 +39,7 @@ export class AuthService {
       { id: user.id },
       this.configService.get<string>('JWT_REFRESH_SECRET')!,
       {
-        expiresIn: '1d',
+        expiresIn: '7d',
       }
     );
 
@@ -66,7 +66,7 @@ export class AuthService {
       { id: user.id },
       this.configService.get<string>('JWT_REFRESH_SECRET')!,
       {
-        expiresIn: '1d',
+        expiresIn: '7d',
       }
     );
 

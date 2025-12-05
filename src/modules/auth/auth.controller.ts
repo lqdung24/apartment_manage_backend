@@ -27,7 +27,7 @@ export class AuthController {
       sameSite: 'lax',
       secure: false, // để test với Postman (khi deploy nên set true)
       path: '/',
-      maxAge: 24 * 60 * 60 * 1000, // 1 ngày
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
     });
 
     // Trả về user + access token
@@ -44,7 +44,7 @@ export class AuthController {
       sameSite: 'lax',
       secure: false,
       path: '/',
-      maxAge: 24 * 60 * 60 * 1000,
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return { user, accessToken };

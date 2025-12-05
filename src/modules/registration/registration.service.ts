@@ -1,10 +1,10 @@
-import {ForbiddenException, Injectable} from "@nestjs/common";
+import {ConflictException, ForbiddenException, Injectable} from "@nestjs/common";
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {RegisTempResidentDto} from "./dto/regis-temp-resident.dto";
 import {RegisTempAndUpdateDto} from "./dto/regis-temp-and-update.dto";
 import {ResidentService} from "../house-hold/resident.service";
-import now = jest.now;
 import {RegisTempAbsentDto} from "./dto/regis-temp-absent";
+import {InformationStatus} from "@prisma/client";
 
 @Injectable()
 export class RegistrationService{
@@ -17,7 +17,8 @@ export class RegistrationService{
       const resident = await tx.resident.create({
         data: {
           ...dto.resident,
-          houseHoldId: householdId
+          houseHoldId: householdId,
+          residentStatus: "TEMP_RESIDENT"
         }
       });
 
@@ -28,7 +29,6 @@ export class RegistrationService{
           startDate: new Date(dto.startDate),
           endDate: new Date(dto.endDate),
           reason: dto.reason,
-          address: dto.address,
           submittedUserId: userId,
           householdId: householdId,
         },
@@ -37,14 +37,22 @@ export class RegistrationService{
   }
   async createTempRegistration(dto: RegisTempAndUpdateDto, residentId: number,userId: number, householdId: number){
     return this.prisma.$transaction(async (tx)=>{
-      await tx.temporaryResident.updateMany({
+      const record = await tx.temporaryResident.findFirst({
         where: {
           residentId,
           informationStatus: "PENDING"
-        },
-        data: { informationStatus: "DELETED" }
+        }
       })
-
+      if(record){
+        throw new ConflictException("You already have a registration")
+      }
+      await tx.temporaryResident.updateMany({
+        where: {
+          residentId: residentId,
+          informationStatus: "APPROVED"
+        },
+        data: {endDate: new Date()}
+      })
       const resident = await tx.resident.update({
         where: {
           id: residentId,
@@ -62,7 +70,6 @@ export class RegistrationService{
           startDate: new Date(dto.startDate),
           endDate: new Date(dto.endDate),
           reason: dto.reason,
-          address: dto.address,
           submittedUserId: userId,
           householdId: householdId,
         }
@@ -74,7 +81,7 @@ export class RegistrationService{
     return this.prisma.temporaryResident.findMany({
       where:{
         householdId,
-        informationStatus: {not: "DELETED"}
+        informationStatus: {not: "ENDED"}
       },
       include:{
         resident: true,
@@ -84,14 +91,12 @@ export class RegistrationService{
 
   async deleteTempResidentRegistration(regisId: number){
     return this.prisma.$transaction( async (tx) => {
-      const record = await tx.temporaryResident.update({
-        where: {id: regisId},
-        data: {
-          informationStatus: "DELETED",
-          endDate: new Date(Date.now())
-        }
+      const record = await tx.temporaryResident.findFirstOrThrow({
+        where: {id: regisId}
       })
-
+      if(record.informationStatus != "PENDING"){
+        throw new ForbiddenException("You aren't allow to delete approved registration")
+      }
       await tx.resident.update({
         where: {
           id: record.residentId
@@ -100,7 +105,9 @@ export class RegistrationService{
           residentStatus: "MOVE_OUT"
         }
       })
-      return record
+      return tx.temporaryResident.delete({
+        where: {id: regisId}
+      })
     })
   }
 
@@ -110,12 +117,12 @@ export class RegistrationService{
     householdId: number
   ) {
     return this.prisma.$transaction(async (tx) => {
-      // Lấy bản ghi hiện tại để biết residentId
-      const existing = await tx.temporaryResident.findFirstOrThrow({
-        where: {
-          id: registrationId,
-        },
-      });
+      const record = await tx.temporaryResident.findFirstOrThrow({
+        where: {id: registrationId}
+      })
+      if(record.informationStatus != "PENDING"){
+        throw new ForbiddenException("You aren't allow to delete approved registration")
+      }
 
       // Tách resident khỏi dto
       const { resident, ...tempResidentData } = dto;
@@ -123,7 +130,7 @@ export class RegistrationService{
       // Nếu có dữ liệu resident → update bảng resident
       if (resident) {
         await tx.resident.update({
-          where: { id: existing.residentId, houseHoldId: householdId },
+          where: { id: record.residentId, houseHoldId: householdId },
           data: resident,
         });
       }
@@ -142,16 +149,28 @@ export class RegistrationService{
       where: {houseHoldId: householdId, residentStatus: "TEMP_ABSENT"},
       include: {
         TemporaryAbsence: {
-          where: { informationStatus: { notIn: ["DELETED", "ENDED"] } },
+          where: { informationStatus: { not: "ENDED" } },
         },
       }
     })
   }
   async createTempAbsentRegistration(dto: RegisTempAbsentDto, userId: number, householdId: number){
     return this.prisma.$transaction(async (tx) => {
+      const record = await tx.temporaryAbsence.findFirst({
+        where: {
+          residentId: dto.residentId,
+          informationStatus: {in: ["PENDING"]}
+        }
+      })
+      if(record){
+        throw new ConflictException("You have already submitted a registration")
+      }
       await tx.temporaryAbsence.updateMany({
-        where: {id: dto.residentId, informationStatus: "PENDING"},
-        data: {informationStatus: "DELETED"}
+        where: {
+          residentId: dto.residentId,
+          informationStatus: "APPROVED"
+        },
+        data: {endDate: new Date()}
       })
       await tx.resident.update({
         where: {id: dto.residentId, houseHoldId: householdId},
@@ -215,6 +234,263 @@ export class RegistrationService{
       }else{
         throw new ForbiddenException("You are't allow to update")
       }
+    })
+  }
+
+  async getDetailTempResident(registrationId: number){
+    return this.prisma.temporaryResident.findFirstOrThrow({
+      where: {id: registrationId},
+      select:{
+        id: true,
+        householdId: true,
+        startDate: true,
+        endDate: true,
+        submittedAt: true,
+        reason: true,
+        reviewedAdminId: true,
+        reviewedAt: true,
+        resident: {
+          select: {
+            id: true,
+            fullname: true,
+            nationalId: true,
+            phoneNumber: true,
+            dateOfBirth: true,
+            relationshipToHead: true,
+            placeOfOrigin: true,
+            workingAdress: true,
+            occupation: true,
+          }
+        }
+      },
+    })
+  }
+  async paginateTempResident(options: {
+    status: InformationStatus
+    page: number;
+    limit: number;
+    sortBy: string; // vd: "submittedAt" hoặc "resident.fullname"
+    order: 'asc' | 'desc';
+  }) {
+    const {status, page, limit, sortBy, order } = options;
+    const skip = (page - 1) * limit;
+
+    // ---- Parse sortBy để Prisma hiểu ----
+    let orderBy: any = {};
+
+    if (sortBy.includes(".")) {
+      // Sort theo quan hệ: resident.fullname
+      const [relation, field] = sortBy.split(".");
+      orderBy = {
+        [relation]: {
+          [field]: order,
+        },
+      };
+    } else {
+      // Sort theo field của bảng gốc
+      orderBy = {
+        [sortBy]: order,
+      };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const [data, total] = await Promise.all([
+        tx.temporaryResident.findMany({
+          where: {
+            informationStatus: status
+          },
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            submittedAt: true,
+            householdId: true,
+            resident: {
+              select: {
+                id: true,
+                fullname: true,
+                nationalId: true,
+              },
+            },
+          },
+          orderBy,
+        }),
+
+        tx.temporaryResident.count(),
+      ]);
+
+      return {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        data,
+      };
+    });
+  }
+
+  async updateTempResidentStatus(
+    regisId: number,
+    status: { informationStatus: InformationStatus; rejectReason?: string },
+    adminId: number
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const updateData: any = {
+        informationStatus: status.informationStatus,
+      };
+
+      if (status.rejectReason) {
+        updateData.rejectReason = status.rejectReason;
+      }
+
+      const record = await tx.temporaryResident.update({
+        where: { id: regisId },
+        data: {
+          ...updateData,
+          reviewedAdminId: adminId,
+          reviewedAt: new Date()
+        },
+      });
+
+      await tx.resident.update({
+        where: { id: record.residentId },
+        data: { informationStatus: status.informationStatus },
+      });
+
+      return record;
+    });
+  }
+  async paginateTempAbsence(options: {
+    status: InformationStatus
+    page: number;
+    limit: number;
+    sortBy: string; // vd: "submittedAt" hoặc "resident.fullname"
+    order: 'asc' | 'desc';
+  }) {
+    const {status, page, limit, sortBy, order } = options;
+    const skip = (page - 1) * limit;
+    let orderBy: any = {};
+    if (sortBy.includes(".")) {
+      const [relation, field] = sortBy.split(".");
+      orderBy = {
+        [relation]: {
+          [field]: order,
+        },
+      };
+    } else {
+      orderBy = {
+        [sortBy]: order,
+      };
+    }
+
+    return this.prisma.$transaction(async (tx) => {
+      const [data, total] = await Promise.all([
+        tx.temporaryAbsence.findMany({
+          where: {
+            informationStatus: status
+          },
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            submittedAt: true,
+            resident: {
+              select: {
+                id: true,
+                fullname: true,
+                nationalId: true,
+                houseHoldId: true,
+              },
+            },
+          },
+          orderBy,
+        }),
+
+        tx.temporaryResident.count(),
+      ]);
+
+      return {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+        data,
+      };
+    });
+  }
+  async getDetailTempAbsence(registrationId: number){
+    return this.prisma.temporaryAbsence.findFirstOrThrow({
+      where: {id: registrationId},
+      select:{
+        id: true,
+        startDate: true,
+        endDate: true,
+        submittedAt: true,
+        reason: true,
+        destination: true,
+        reviewedAdminId: true,
+        reviewedAt: true,
+        resident: {
+          select: {
+            id: true,
+            fullname: true,
+            nationalId: true,
+            phoneNumber: true,
+            dateOfBirth: true,
+            relationshipToHead: true,
+            placeOfOrigin: true,
+            workingAdress: true,
+            occupation: true,
+            houseHoldId: true,
+          }
+        }
+      },
+    })
+  }
+
+  async updateTempAbsenceStatus(
+    regisId: number,
+    status: { informationStatus: InformationStatus; rejectReason?: string },
+    adminId: number
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const updateData: any = {
+        informationStatus: status.informationStatus,
+      };
+
+      if (status.rejectReason) {
+        updateData.rejectReason = status.rejectReason;
+      }
+
+      const record = await tx.temporaryAbsence.update({
+        where: { id: regisId },
+        data: {
+          ...updateData,
+          reviewedAdminId: adminId,
+          reviewedAt: new Date()
+        },
+      });
+
+      await tx.resident.update({
+        where: { id: record.residentId },
+        data: { informationStatus: status.informationStatus },
+      });
+
+      return record;
+    });
+  }
+
+  async findTempAbsenceByNationalId(nationalId: string, status: InformationStatus){
+    return this.prisma.$transaction(async (tx) => {
+      const record = await tx.resident.findFirstOrThrow({
+        where: {nationalId}
+      })
+      return tx.temporaryAbsence.findMany({
+        where: {
+          residentId: record.id,
+          informationStatus: status,
+        }
+      })
     })
   }
 }
