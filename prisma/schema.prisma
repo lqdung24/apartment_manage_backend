@@ -134,7 +134,6 @@ enum InformationStatus {
   PENDING
   APPROVED
   REJECTED
-  DELETED
   ENDED
 }
 
@@ -161,12 +160,12 @@ model TemporaryResident {
   startDate         DateTime
   endDate           DateTime
   reason            String
-  address           String
   informationStatus InformationStatus @default(PENDING)
   submittedUserId   Int
   submittedAt       DateTime          @default(now())
   reviewedAdminId   Int?
   reviewedAt        DateTime?
+  rejectReason      String?
 
   household     HouseHolds @relation("tempaResHousehold", fields: [householdId], references: [id])
   resident      Resident   @relation("tempResidence", fields: [residentId], references: [id])
@@ -180,12 +179,13 @@ model TemporaryAbsence {
   startDate         DateTime
   endDate           DateTime
   reason            String
-  destination       String // Nơi đến tạm vắng
+  destination       String
   informationStatus InformationStatus @default(PENDING)
   submittedUserId   Int
   submittedAt       DateTime          @default(now())
   reviewedAdminId   Int?
   reviewedAt        DateTime?
+  rejectReason String?
 
   resident      Resident @relation("tempAbsence", fields: [residentId], references: [id])
   submittedUser Users    @relation("tempAbsenceSubmit", fields: [submittedUserId], references: [id])
@@ -202,6 +202,7 @@ model ResidentChanges {
   submitAt      DateTime  @default(now())
   reviewAdminId Int?
   reviewAt      DateTime?
+  rejectReason String?
 
   resident      Resident @relation("residentChange", fields: [residentId], references: [id])
   submittedUser Users    @relation("RcSubmit", fields: [submitUserId], references: [id])

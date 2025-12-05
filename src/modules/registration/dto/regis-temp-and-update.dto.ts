@@ -20,9 +20,6 @@ export class RegisTempAndUpdateDto{
   @IsString()
   reason:            string;
 
-  @IsString()
-  address:       string; // Nơi đến tạm vắng
-
   @IsNumber()
   submittedUserId:   number;
 
