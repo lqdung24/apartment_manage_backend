@@ -19,30 +19,6 @@ export class FeeController {
   }
 
   @Roles ('ADMIN')
-  @Get()
-  findAll() {
-    return this.feeService.findAll();
-  }
-
-  @Roles ('ADMIN')
-  @Get(':id')
-  findOne(@Param('id', ParseIntPipe) id: number) {
-      return this.feeService.findOne(id);
-  }
-
-  @Roles ('ADMIN')
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() dto: Partial<CreateFeeDto>) {
-    return this.feeService.update(Number(id), dto);
-  }
-
-  @Roles ('ADMIN')
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.feeService.remove(Number(id));
-  }
-
-  @Roles ('ADMIN')
   @Post('assign')
   assign(@Body() dto: CreateFeeAssignmentDto) {
     return this.feeService.assignFee(dto);
@@ -67,6 +43,30 @@ export class FeeController {
   @Get('household/:id/unpaid')
   getUnpaid(@Param('id') id: string) {
     return this.feeService.getUnpaidFees(Number(id));
+  }
+
+  @Roles ('ADMIN')
+  @Get()
+  findAll() {
+    return this.feeService.findAll();
+  }
+
+  @Roles ('ADMIN')
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+      return this.feeService.findOne(id);
+  }
+
+  @Roles ('ADMIN')
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() dto: Partial<CreateFeeDto>) {
+    return this.feeService.update(Number(id), dto);
+  }
+
+  @Roles ('ADMIN')
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.feeService.remove(Number(id));
   }
 
 }
