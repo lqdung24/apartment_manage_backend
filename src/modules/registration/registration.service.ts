@@ -247,7 +247,11 @@ export class RegistrationService{
         endDate: true,
         submittedAt: true,
         reason: true,
-        reviewedAdminId: true,
+        reviewedAdmin:{
+          select: {
+            username: true
+          }
+        },
         reviewedAt: true,
         resident: {
           select: {
@@ -428,7 +432,11 @@ export class RegistrationService{
         submittedAt: true,
         reason: true,
         destination: true,
-        reviewedAdminId: true,
+        reviewedAdmin:{
+          select: {
+            username: true
+          }
+        },
         reviewedAt: true,
         resident: {
           select: {
