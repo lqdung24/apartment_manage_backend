@@ -1,17 +1,57 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
-
+import { Prisma } from '@prisma/client';
+import { GetHouseholdsQueryDto } from './dto/get-households.dto';
 @Injectable()
 export class AdminService {
     constructor(private readonly prisma: PrismaService ){}
-    async getAllHouseholds() {
-    return this.prisma.houseHolds.findMany({
-      include: {
-        // head: true,
-        resident: true,
+    async getAllHouseholds(query: GetHouseholdsQueryDto) {
+    const { page = 1, limit = 5, search } = query;
+
+    const skip = (page - 1) * limit;
+
+    const where: Prisma.HouseHoldsWhereInput = {};
+
+    if (search) {
+      const searchAsNumber = Number(search);
+      const isNumber = !isNaN(searchAsNumber);
+
+      where.OR = [
+        { apartmentNumber: { contains: search, mode: 'insensitive' } },
+        { 
+          head: { 
+            fullname: { contains: search, mode: 'insensitive' } 
+          } 
+        },
+      ];
+
+      if (isNumber) {
+        where.OR.push({ houseHoldCode: searchAsNumber });
+      }
+    }
+    const [data, total] = await Promise.all([
+      this.prisma.houseHolds.findMany({
+        skip: skip,
+        take: limit,
+        where: where,
+        include: {
+          head: true,
+          resident: true,
+        },
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.houseHolds.count({ where: where }),
+    ]);
+
+    return {
+      data,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-      orderBy: { id: 'asc' },
-    });
+    };
   }
 
   async getHouseholdDetail(id: number) {
