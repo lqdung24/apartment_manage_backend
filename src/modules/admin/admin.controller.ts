@@ -1,8 +1,9 @@
 import { AdminService } from './admin.service';
-import { Controller, Get, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, UseGuards, Query } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorater';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import { GetHouseholdsQueryDto } from './dto/get-households.dto';
 @Controller('admin')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 export class AdminController {
@@ -10,8 +11,8 @@ export class AdminController {
 
   @Get()
   @Roles('ADMIN')
-  getAllHouseholds() {
-    return this.adminService.getAllHouseholds();
+  getAllHouseholds(@Query() query: GetHouseholdsQueryDto) {
+    return this.adminService.getAllHouseholds(query);
   }
 
   @Get(':id')

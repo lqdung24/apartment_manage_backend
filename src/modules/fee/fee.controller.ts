@@ -1,11 +1,10 @@
-import { Body, Controller, Get, Post, Patch, Delete, Param, ParseIntPipe, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Patch, Delete, Param, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
 import { FeeService } from './fee.service';
 import { CreateFeeDto } from './dto/create-fee.dto';
 import { CreateFeeAssignmentDto } from './dto/create-assignment.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorater';
 import { RolesGuard } from 'src/common/guards/roles.guard';
-
 
 @Controller('fee')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -24,10 +23,18 @@ export class FeeController {
     return this.feeService.assignFee(dto);
   }
   
-  @Roles ('ADMIN')
   @Get(':id/detail')
-  detail(@Param('id') id: string) {
-    return this.feeService.getFeeDetail(Number(id));
+  detail(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('page') page?: number,
+    @Query('limit') limit?: number,
+    @Query('isPaid') isPaid?: string, 
+  ) {
+    return this.feeService.getFeeDetail(id, { 
+      page, 
+      limit, 
+      isPaid 
+    });
   }
 
   @Get('household/:id')
@@ -47,8 +54,16 @@ export class FeeController {
 
   @Roles ('ADMIN')
   @Get()
-  findAll() {
-    return this.feeService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.feeService.findAll({
+      page: page? Number(page) : 1,
+      limit: limit ? Number(limit) : 5,
+      search,
+    });
   }
 
   @Roles ('ADMIN')
