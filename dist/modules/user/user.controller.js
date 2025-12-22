@@ -32,6 +32,15 @@ let UserController = class UserController {
     updateRole(id, dto) {
         return this.userService.updateRole(id, dto);
     }
+    createAccounts(num) {
+        return this.userService.createAccounts(num);
+    }
+    getAll(page = 1, limit = 10) {
+        return this.userService.getAll(page, limit);
+    }
+    deleteMany(ids) {
+        return this.userService.deleteUsers(ids);
+    }
 };
 exports.UserController = UserController;
 __decorate([
@@ -51,6 +60,34 @@ __decorate([
     __metadata("design:paramtypes", [Number, update_user_role_dto_1.UpdateUserRoleDto]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "updateRole", null);
+__decorate([
+    (0, common_1.Post)('/create-accounts'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Body)('num', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "createAccounts", null);
+__decorate([
+    (0, common_1.Get)('/all'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Query)('page', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Query)('limit', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getAll", null);
+__decorate([
+    (0, common_1.Delete)('/delete'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Body)('ids')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Array]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "deleteMany", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

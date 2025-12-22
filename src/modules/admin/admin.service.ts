@@ -6,29 +6,29 @@ import { GetHouseholdsQueryDto } from './dto/get-households.dto';
 export class AdminService {
     constructor(private readonly prisma: PrismaService ){}
     async getAllHouseholds(query: GetHouseholdsQueryDto) {
-    const { page = 1, limit = 5, search } = query;
+      const { page = 1, limit = 5, search } = query;
 
-    const skip = (page - 1) * limit;
+      const skip = (page - 1) * limit;
 
-    const where: Prisma.HouseHoldsWhereInput = {};
+      const where: Prisma.HouseHoldsWhereInput = {};
 
-    if (search) {
-      const searchAsNumber = Number(search);
-      const isNumber = !isNaN(searchAsNumber);
+      if (search) {
+        const searchAsNumber = Number(search);
+        const isNumber = !isNaN(searchAsNumber);
 
-      where.OR = [
-        { apartmentNumber: { contains: search, mode: 'insensitive' } },
-        { 
-          head: { 
-            fullname: { contains: search, mode: 'insensitive' } 
-          } 
-        },
-      ];
+        where.OR = [
+          { apartmentNumber: { contains: search, mode: 'insensitive' } },
+          {
+            head: {
+              fullname: { contains: search, mode: 'insensitive' }
+            }
+          },
+        ];
 
-      if (isNumber) {
-        where.OR.push({ houseHoldCode: searchAsNumber });
+        if (isNumber) {
+          where.OR.push({ houseHoldCode: searchAsNumber });
+        }
       }
-    }
     const [data, total] = await Promise.all([
       this.prisma.houseHolds.findMany({
         skip: skip,
@@ -64,5 +64,10 @@ export class AdminService {
       },
     });
     return household;
+  }
+
+
+  async createAccounts(num: number){
+
   }
 }

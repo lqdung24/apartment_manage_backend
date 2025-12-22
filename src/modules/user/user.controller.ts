@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UseGuards,
+  UseGuards, Query,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,29 +26,6 @@ export class UserController {
   create(@Body() data: CreateUserDto) {
     return this.userService.createUser(data);
   }
-  //
-  // @Get()
-  // findAll() {
-  //   return this.userService.findAll();
-  // }
-  //
-  // @Get(':id')
-  // findById(@Param('id', ParseIntPipe) id: number) {
-  //   return this.userService.findById(id);
-  // }
-  //
-  // @Patch(':id')
-  // updateById(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() data: UpdateUserDto,
-  // ) {
-  //   return this.userService.updateById(id, data);
-  // }
-  //
-  // @Delete(':id')
-  // removeById(@Param('id', ParseIntPipe) id: number) {
-  //   return this.userService.removeById(id);
-  // }
 
   @Patch(':id/update-role')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -56,4 +33,29 @@ export class UserController {
   updateRole(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateUserRoleDto) {
     return this.userService.updateRole(id, dto);
   }
+
+  @Post('/create-accounts')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  createAccounts(@Body('num', ParseIntPipe) num: number) {
+    return this.userService.createAccounts(num);
+  }
+
+  @Get('/all')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  getAll(
+    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', ParseIntPipe) limit = 10,
+  ) {
+    return this.userService.getAll(page, limit);
+  }
+
+  @Delete('/delete')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  deleteMany(@Body('ids') ids: number[]) {
+    return this.userService.deleteUsers(ids);
+  }
+
 }

@@ -18,6 +18,7 @@ export declare class AuthService {
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             householdId: number | null;
+            state: import("@prisma/client").$Enums.State;
             id: number;
         };
         accessToken: string;
@@ -33,6 +34,7 @@ export declare class AuthService {
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             householdId: number | null;
+            state: import("@prisma/client").$Enums.State;
             id: number;
         };
         accessToken: string;
@@ -51,6 +53,7 @@ export declare class AuthService {
             resetToken: string | null;
             resetTokenExpiry: Date | null;
             householdId: number | null;
+            state: import("@prisma/client").$Enums.State;
             id: number;
         };
         accessToken: string;

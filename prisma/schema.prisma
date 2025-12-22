@@ -18,6 +18,8 @@ model Users {
   resetTokenExpiry DateTime?
   householdId      Int?        @unique
   HouseHolds       HouseHolds? @relation("account")
+  state            State       @default(INACTIVE)
+
   TemporaryResidenceSubmit TemporaryResident[] @relation("tempResSubmit")
   TemporaryResidenceReview TemporaryResident[] @relation("tempResReview")
   TemporaryAbsenceSubmit   TemporaryAbsence[]  @relation("tempAbsenceSubmit")
@@ -26,6 +28,12 @@ model Users {
   RcReviews                ResidentChanges[]   @relation("RcReview")
   HcSubmit                 HouseholdChanges[]  @relation("HcSubmit")
   HcReview                 HouseholdChanges[]  @relation("HcReview")
+}
+
+enum State{
+  INACTIVE
+  ACTIVE
+  DELETED
 }
 
 enum Role {
@@ -45,10 +53,10 @@ model HouseHolds {
   status          HouseHoldStatus @default(ACTIVE)
   createtime      DateTime        @default(now())
   headID          Int             @unique
-  userID          Int             @unique
+  userID          Int?             @unique
   FeeAssignment   FeeAssignment[]
   head            Resident        @relation("headOfHouse", fields: [headID], references: [id])
-  account         Users           @relation("account", fields: [userID], references: [id])
+  account         Users?           @relation("account", fields: [userID], references: [id])
   resident        Resident[]      @relation("houseMembers")
 
 

@@ -21,7 +21,6 @@ export class AuthService {
   {}
 
   async signup(dto: SignUpDto) {
-
     const hashed = await bcrypt.hash(dto.password, 10);
     const user = await this.prisma.users.create({
       data: { ...dto, password: hashed, role: Role.USER },
@@ -148,4 +147,5 @@ export class AuthService {
 
     return { message: 'Password reset successfully' };
   }
+
 }
