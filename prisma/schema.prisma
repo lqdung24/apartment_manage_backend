@@ -51,6 +51,7 @@ model HouseHolds {
   ward            String
   province        String
   status          HouseHoldStatus @default(ACTIVE)
+  informationStatus InformationStatus @default(PENDING)
   createtime      DateTime        @default(now())
   headID          Int             @unique
   userID          Int?             @unique
@@ -60,6 +61,7 @@ model HouseHolds {
   resident        Resident[]      @relation("houseMembers")
 
 
+  HouseholdChanges HouseholdChanges[] @relation("householdChange")
   TemporaryResidence TemporaryResident[] @relation("tempaResHousehold")
 }
 
@@ -90,7 +92,6 @@ model Resident {
   TemporaryResidence TemporaryResident[] @relation("tempResidence")
   TemporaryAbsence   TemporaryAbsence[]  @relation("tempAbsence")
   ResidentChanges ResidentChanges[] @relation("residentChange")
-  HouseholdChanges HouseholdChanges[] @relation("householdChange")
 }
 
 model Fee {
@@ -142,6 +143,7 @@ enum InformationStatus {
   PENDING
   APPROVED
   REJECTED
+  DELETING
   ENDED
 }
 
@@ -204,13 +206,13 @@ model ResidentChanges {
   id            Int       @id @default(autoincrement())
   residentId    Int
   action        Actions
-  oldData       Json?
-  newData       Json?
   submitUserId  Int
   submitAt      DateTime  @default(now())
+  updateReason  String?
   reviewAdminId Int?
   reviewAt      DateTime?
   rejectReason String?
+  informationStatus InformationStatus @default(PENDING)
 
   resident      Resident @relation("residentChange", fields: [residentId], references: [id])
   submittedUser Users    @relation("RcSubmit", fields: [submitUserId], references: [id])
@@ -221,14 +223,15 @@ model HouseholdChanges {
   id            Int       @id @default(autoincrement())
   householdId   Int
   action        Actions
-  oldData       Json?
-  newData       Json?
   submitUserId  Int
   submitAt      DateTime  @default(now())
+  updateReason  String?
   reviewAdminId Int?
   reviewAt      DateTime?
+  rejectReason String?
+  informationStatus InformationStatus @default(PENDING)
 
-  resident      Resident @relation("householdChange", fields: [householdId], references: [id])
+  household      HouseHolds @relation("householdChange", fields: [householdId], references: [id])
   submittedUser Users    @relation("HcSubmit", fields: [submitUserId], references: [id])
   reviewedAdmin Users?   @relation("HcReview", fields: [reviewAdminId], references: [id])
 }

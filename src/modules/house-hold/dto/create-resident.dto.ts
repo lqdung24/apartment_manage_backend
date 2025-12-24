@@ -1,5 +1,5 @@
 import { IsString, IsEmail, IsEnum, IsDateString, IsNotEmpty, IsOptional, IsInt } from 'class-validator';
-import {Gender, RelationshipToHead, ResidenceStatus} from '@prisma/client';
+import {Gender, InformationStatus, RelationshipToHead, ResidenceStatus} from '@prisma/client';
 
 export class CreateResidentDto {
   @IsString()
@@ -49,4 +49,11 @@ export class CreateResidentDto {
   @IsEnum(ResidenceStatus)
   @IsOptional()
   residentStatus?: ResidenceStatus
+
+  @IsEnum(InformationStatus)
+  @IsOptional()
+  informationStatus?: InformationStatus
+
+  @IsOptional()
+  updateReason?: string
 }

@@ -5,6 +5,7 @@ import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
 import {CreateResidentDto} from "./dto/create-resident.dto";
 import {CreateHouseHoldDto} from "./dto/create-house-hold.dto";
 import {ResidentService} from "./resident.service";
+import {UpdateHouseHoldDto} from "./dto/UpdateHouseHoldDto";
 
 @Controller('house-hold')
 export class HouseHoldController {
@@ -21,7 +22,7 @@ export class HouseHoldController {
   @Post('addmember')
   @UseGuards(AuthGuard('jwt'))
   addHouseMember(@Req() req, @Body() dto: CreateResidentDto){
-    return this.houseHoldService.addHouseMember(req.user.householdId, dto);
+    return this.houseHoldService.addHouseMember(req.user.id, req.user.householdId, dto);
   }
   @Get()
   @UseGuards(AuthGuard('jwt'))
@@ -41,13 +42,22 @@ export class HouseHoldController {
     @Param('residentId') residentId: string,
     @Body() dto: Partial<CreateResidentDto>
   ) {
-    return this.houseHoldService.updateMember(Number(residentId), req.user.householdId, dto);
+    return this.houseHoldService.updateMember(req.user.id, Number(residentId), req.user.householdId, dto);
   }
 
   @Delete('member/:residentId')
   @UseGuards(AuthGuard('jwt'))
-  deleteHouseMember(@Req() req, @Param('residentId') residentId: string) {
-    return this.houseHoldService.deleteMember(Number(residentId), req.user.householdId);
+  deleteHouseMember(
+    @Req() req,
+    @Param('residentId') residentId: string,
+    @Body('reason') reason: string,
+    ) {
+    return this.houseHoldService.deleteMember(
+      req.user.id,
+      Number(residentId),
+      req.user.householdId,
+      reason
+    );
   }
   @Get('temp-resident/:nationalId')
   @UseGuards(AuthGuard('jwt'))
@@ -56,8 +66,8 @@ export class HouseHoldController {
   }
   @Patch('update')
   @UseGuards(AuthGuard('jwt'))
-  updateHousehold(@Req() req, @Body() dto: Partial<CreateHouseHoldDto>){
-    // console.log(dto)
-    return this.houseHoldService.updateHousehold(req.user.householdId, dto);
+  updateHousehold(@Req() req, @Body() dto: UpdateHouseHoldDto){
+    //console.log(dto)
+    return this.houseHoldService.updateHousehold(req.user.id, req.user.householdId, dto);
   }
 }

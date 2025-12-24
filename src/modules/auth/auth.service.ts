@@ -113,6 +113,7 @@ export class AuthService {
 
     return message;
   }
+
   // verify token
   async verifyResetToken(token: string) {
   const user = await this.prisma.users.findFirst({

@@ -1,12 +1,13 @@
 import {ConflictException, ForbiddenException, Head, Injectable, NotFoundException} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateHouseHoldAndHeadDto} from "./dto/create-house-hold-and-head.dto";
-import {HouseHoldStatus, RelationshipToHead} from "@prisma/client";
+import {Actions, HouseHoldStatus, InformationStatus, RelationshipToHead} from "@prisma/client";
 import {CreateResidentDto} from "./dto/create-resident.dto";
 import {UserService} from "../user/user.service";
 import {ResidentService} from "./resident.service";
 import {CreateHouseHoldDto} from "./dto/create-house-hold.dto";
 import { AdminGateway } from 'src/websocket/admin.gateway';
+import {UpdateHouseHoldDto} from "./dto/UpdateHouseHoldDto";
 
 @Injectable()
 export class HouseHoldService {
@@ -20,7 +21,7 @@ export class HouseHoldService {
     //flow: tạo resident -> household (với user và resident đã tạo)
     // liên kết resident với house hold
     dto.resident.relationshipToHead = RelationshipToHead.HEAD
-    const resident = await this.residentService.createResident(dto.resident);
+    const resident = await this.residentService.createResident(userId, dto.resident);
 
     const household = await this.prisma.houseHolds.create({
       data: {
@@ -38,8 +39,50 @@ export class HouseHoldService {
     await this.userService.updateHouseholdId(userId, household.id)
     await this.residentService.assignHouseHold(resident.id, household.id);
     resident.houseHoldId = household.id;
+    await this.prisma.users.update({
+      where: {id: userId},
+      data: {
+        state: "ACTIVE"
+      }
+    })
+    const pending = await this.prisma.householdChanges.findFirst({
+      where: {
+        householdId: household.id,
+        informationStatus: InformationStatus.PENDING,
+      },
+    });
 
-    this.adminGateway.notifyHouseholdUpdated({
+    if (pending) {
+      // ✅ đã có pending → update
+      await this.prisma.householdChanges.update({
+        where: { id: pending.id },
+        data: {
+          action: Actions.CREATE,
+          submitUserId: userId,
+          submitAt: new Date(),
+        },
+      });
+    } else {
+      // ✅ chưa có pending → create
+      await this.prisma.householdChanges.create({
+        data: {
+          householdId: household.id,
+          action: Actions.CREATE,
+          submitUserId: userId,
+          informationStatus: InformationStatus.PENDING,
+          submitAt: new Date(),
+        },
+      });
+    }
+
+    await this.prisma.residentChanges.create({
+      data: {
+        residentId: resident.id,
+        action: Actions.CREATE,
+        submitUserId: userId,
+      }
+    })
+    await this.adminGateway.notifyHouseholdUpdated({
       action: 'create',
       household,
       resident,
@@ -48,7 +91,7 @@ export class HouseHoldService {
     return { household, resident }
   }
 
-  async addHouseMember(householdId: number, dto: CreateResidentDto){
+  async addHouseMember(userId: number,householdId: number, dto: CreateResidentDto){
     const household = await this.prisma.houseHolds.findFirst({
       where: { id: householdId }
     })
@@ -57,20 +100,26 @@ export class HouseHoldService {
 
     if(household.headID && dto.relationshipToHead == RelationshipToHead.HEAD)
       throw new ConflictException("This Household already has head")
+
     dto.houseHoldId = householdId;
-    const newMember = await this.residentService.createResident(dto);
+
+    const newMember =
+      await this.residentService.createResident(userId, dto);
+
     this.adminGateway.notifyHouseholdUpdated({
       action:'add_member',
       householdId,
       resident: newMember,
     })
+
     return newMember;
   }
   async getAllMember(householdId: number){
     return this.residentService.getResidentByHouseHoldId(householdId)
   }
-  async deleteMember(residentId: number, householdId: number) {
-    const deleted = await this.residentService.deleteResident(residentId, householdId);
+  async deleteMember(userId: number, residentId: number, householdId: number, reason: string) {
+    const deleted =
+      await this.residentService.deleteResident(userId, residentId, householdId, reason);
 
     this.adminGateway.notifyHouseholdUpdated({
       action: 'delete_member',
@@ -80,8 +129,8 @@ export class HouseHoldService {
 
     return deleted;
   }
-  async updateMember(residentId: number, householdId: number, dto: Partial<CreateResidentDto>){
-    const updated = await this.residentService.updateResident(residentId, householdId, dto);
+  async updateMember(userId: number, residentId: number, householdId: number, dto: Partial<CreateResidentDto>){
+    const updated = await this.residentService.updateResident(userId, residentId, householdId, dto);
     this.adminGateway.notifyHouseholdUpdated({
       action: 'update_member',
       householdId,
@@ -104,7 +153,8 @@ export class HouseHoldService {
     return {household, head}
   }
 
-  async updateHousehold(id: number, data: Partial<CreateHouseHoldDto>){
+  async updateHousehold(userId: number, id: number, data: UpdateHouseHoldDto){
+    //console.log(userId, id)
     const oldHousehold = await this.prisma.houseHolds.findFirstOrThrow({
       where:{id}
     })
@@ -138,9 +188,43 @@ export class HouseHoldService {
         data:{relationshipToHead: RelationshipToHead.HEAD}
       })
     }
+    data.informationStatus = "PENDING"
+    const { updateReason, ...householdData } = data; // tách ra
+    const pending = await this.prisma.householdChanges.findFirst({
+      where: {
+        householdId: id,
+        informationStatus: InformationStatus.PENDING,
+      },
+    });
+
+    if (pending) {
+      // ✅ đã có pending → update
+      await this.prisma.householdChanges.update({
+        where: { id: pending.id },
+        data: {
+          action: Actions.UPDATE,
+          submitUserId: userId,
+          submitAt: new Date(),
+          updateReason
+        },
+      });
+    } else {
+      // ✅ chưa có pending → create
+      await this.prisma.householdChanges.create({
+        data: {
+          householdId: id,
+          action: Actions.UPDATE,
+          submitUserId: userId,
+          informationStatus: InformationStatus.PENDING,
+          submitAt: new Date(),
+          updateReason
+        },
+      });
+    }
+
     const updateHousehold = await this.prisma.houseHolds.update({
-      where: {id},
-      data: data
+      where: { id },
+      data: householdData
     })
 
     this.adminGateway.notifyHouseholdUpdated({
@@ -149,5 +233,4 @@ export class HouseHoldService {
     });
     return updateHousehold
   }
-
 }

@@ -21,6 +21,7 @@ const passport_1 = require("@nestjs/passport");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorater_1 = require("../../common/decorators/roles.decorater");
 const client_1 = require("@prisma/client");
+const ApproveHouseholdChange_1 = require("./ApproveHouseholdChange");
 let UserController = class UserController {
     userService;
     constructor(userService) {
@@ -35,11 +36,29 @@ let UserController = class UserController {
     createAccounts(num) {
         return this.userService.createAccounts(num);
     }
-    getAll(page = 1, limit = 10) {
-        return this.userService.getAll(page, limit);
+    getUsers(page = 1, limit = 10, search) {
+        return this.userService.getUsers(page, limit, search);
+    }
+    getDetails(id) {
+        return this.userService.userDetails(id);
     }
     deleteMany(ids) {
         return this.userService.deleteUsers(ids);
+    }
+    resetPassword(id) {
+        return this.userService.resetPassword(id);
+    }
+    approveHouseholdChange(id, body, req) {
+        return this.userService.approveHouseholdChange(req.user.id, id, body.state, body.reason);
+    }
+    getDetailsHouseholdChange(householdId) {
+        return this.userService.getDetailsHouseholdChange(householdId);
+    }
+    getDetailsResidentChange(residentId) {
+        return this.userService.getDetailsResidentChanges(residentId);
+    }
+    approveResidentChange(id, body, req) {
+        return this.userService.approveResidentChange(req.user.id, id, body.state, body.reason);
     }
 };
 exports.UserController = UserController;
@@ -73,12 +92,22 @@ __decorate([
     (0, common_1.Get)('/all'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
     (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
-    __param(0, (0, common_1.Query)('page', common_1.ParseIntPipe)),
-    __param(1, (0, common_1.Query)('limit', common_1.ParseIntPipe)),
+    __param(0, (0, common_1.Query)('page', new common_1.ParseIntPipe({ optional: true }))),
+    __param(1, (0, common_1.Query)('limit', new common_1.ParseIntPipe({ optional: true }))),
+    __param(2, (0, common_1.Query)('search')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, Object, String]),
     __metadata("design:returntype", void 0)
-], UserController.prototype, "getAll", null);
+], UserController.prototype, "getUsers", null);
+__decorate([
+    (0, common_1.Get)('/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getDetails", null);
 __decorate([
     (0, common_1.Delete)('/delete'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
@@ -88,6 +117,55 @@ __decorate([
     __metadata("design:paramtypes", [Array]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "deleteMany", null);
+__decorate([
+    (0, common_1.Post)('/reset-password/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "resetPassword", null);
+__decorate([
+    (0, common_1.Post)('/approve-household-change/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, ApproveHouseholdChange_1.ApproveHouseholdChangeDto, Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "approveHouseholdChange", null);
+__decorate([
+    (0, common_1.Get)('/details-household-change/:householdId'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('householdId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getDetailsHouseholdChange", null);
+__decorate([
+    (0, common_1.Get)('/details-resident-change/:residentId'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('residentId', common_1.ParseIntPipe)),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getDetailsResidentChange", null);
+__decorate([
+    (0, common_1.Post)('/approve-resident-change/:id'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Param)('id', common_1.ParseIntPipe)),
+    __param(1, (0, common_1.Body)()),
+    __param(2, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, ApproveHouseholdChange_1.ApproveHouseholdChangeDto, Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "approveResidentChange", null);
 exports.UserController = UserController = __decorate([
     (0, common_1.Controller)('user'),
     __metadata("design:paramtypes", [user_service_1.UserService])

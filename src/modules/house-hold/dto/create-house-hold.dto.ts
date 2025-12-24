@@ -1,5 +1,5 @@
 import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString } from 'class-validator';
-import { HouseHoldStatus } from '@prisma/client';
+import {HouseHoldStatus, InformationStatus} from '@prisma/client';
 import {Type} from "class-transformer";
 
 export class CreateHouseHoldDto {
@@ -31,4 +31,8 @@ export class CreateHouseHoldDto {
   @IsNumber()
   @IsOptional()
   headID?: number;
+
+  @IsEnum(InformationStatus)
+  @IsOptional()
+  informationStatus?: InformationStatus
 }

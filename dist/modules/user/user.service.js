@@ -47,10 +47,14 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../shared/prisma/prisma.service");
 const client_1 = require("@prisma/client");
 const bcrypt = __importStar(require("bcrypt"));
+const node_crypto_1 = require("node:crypto");
+const mail_service_1 = require("../../common/mail/mail.service");
 let UserService = class UserService {
     prisma;
-    constructor(prisma) {
+    mailService;
+    constructor(prisma, mailService) {
         this.prisma = prisma;
+        this.mailService = mailService;
     }
     async createUser(dto) {
         return this.prisma.users.create({
@@ -92,10 +96,35 @@ let UserService = class UserService {
             data: users,
         });
     }
-    async getAll(page = 1, limit = 10) {
+    async getUsers(page = 1, limit = 10, search) {
         const skip = (page - 1) * limit;
+        const where = search && search.trim().length > 0
+            ? {
+                OR: [
+                    {
+                        email: {
+                            contains: search,
+                            mode: client_1.Prisma.QueryMode.insensitive,
+                        },
+                    },
+                    {
+                        HouseHolds: {
+                            is: {
+                                head: {
+                                    fullname: {
+                                        contains: search,
+                                        mode: client_1.Prisma.QueryMode.insensitive,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                ],
+            }
+            : undefined;
         const [data, total] = await this.prisma.$transaction([
             this.prisma.users.findMany({
+                where,
                 skip,
                 take: limit,
                 orderBy: {
@@ -119,7 +148,7 @@ let UserService = class UserService {
                     },
                 },
             }),
-            this.prisma.users.count(),
+            this.prisma.users.count({ where }),
         ]);
         return {
             data: {
@@ -158,10 +187,146 @@ let UserService = class UserService {
             };
         });
     }
+    async userDetails(id) {
+        return this.prisma.users.findFirstOrThrow({
+            where: {
+                id,
+                state: {
+                    not: client_1.State.DELETED,
+                },
+            },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                state: true,
+                createtime: true,
+                HouseHolds: {
+                    select: {
+                        id: true,
+                        houseHoldCode: true,
+                        apartmentNumber: true,
+                        buildingNumber: true,
+                        street: true,
+                        ward: true,
+                        province: true,
+                        status: true,
+                        createtime: true,
+                        informationStatus: true,
+                        head: {
+                            select: {
+                                id: true,
+                                fullname: true,
+                                nationalId: true,
+                            },
+                        },
+                        resident: {
+                            select: {
+                                id: true,
+                                fullname: true,
+                                nationalId: true,
+                                phoneNumber: true,
+                                email: true,
+                                dateOfBirth: true,
+                                gender: true,
+                                relationshipToHead: true,
+                                residentStatus: true,
+                                informationStatus: true,
+                            },
+                        },
+                    },
+                },
+            },
+        });
+    }
+    async resetPassword(id) {
+        const resetToken = (0, node_crypto_1.randomBytes)(32).toString('hex');
+        const resetTokenExpiry = new Date(Date.now() + 1000 * 60 * 60);
+        const user = await this.prisma.users.update({
+            where: { id },
+            data: { resetToken, resetTokenExpiry },
+        });
+        const resetLink = `http://localhost:3030/auth/reset-password?token=${resetToken}`;
+        return await this.mailService.sendMail(user.email, 'Reset your password', `<p>Click <a href="${resetLink}">here</a> to reset your password. This link will expire in 1 hour.</p>`);
+    }
+    async getDetailsHouseholdChange(householdId) {
+        return this.prisma.householdChanges.findFirstOrThrow({
+            where: { householdId: householdId, informationStatus: client_1.InformationStatus.PENDING }
+        });
+    }
+    async approveHouseholdChange(userId, id, state, reason) {
+        if (state in [client_1.InformationStatus.APPROVED, client_1.InformationStatus.REJECTED]) {
+            throw new common_1.BadRequestException('Invalid approve state');
+        }
+        if (state === client_1.InformationStatus.REJECTED && !reason) {
+            throw new common_1.BadRequestException('Reject reason is required');
+        }
+        return this.prisma.$transaction(async (tx) => {
+            const change = await tx.householdChanges.update({
+                where: { id },
+                data: {
+                    reviewAdminId: userId,
+                    reviewAt: new Date(),
+                    informationStatus: state,
+                    rejectReason: reason,
+                },
+            });
+            await tx.houseHolds.update({
+                where: { id: change.householdId },
+                data: {
+                    informationStatus: state,
+                },
+            });
+            return change;
+        });
+    }
+    async getDetailsResidentChanges(residentId) {
+        return this.prisma.residentChanges.findFirstOrThrow({
+            where: {
+                residentId,
+                informationStatus: {
+                    in: [
+                        client_1.InformationStatus.PENDING,
+                    ],
+                },
+            },
+        });
+    }
+    async approveResidentChange(userId, id, state, reason) {
+        if (state === client_1.InformationStatus.REJECTED && !reason) {
+            throw new common_1.BadRequestException('Reject reason is required');
+        }
+        return this.prisma.$transaction(async (tx) => {
+            const change = await tx.residentChanges.update({
+                where: { id },
+                data: {
+                    reviewAdminId: userId,
+                    reviewAt: new Date(),
+                    informationStatus: state,
+                    rejectReason: reason,
+                },
+            });
+            const updateData = {
+                informationStatus: state,
+                ...(change.action === client_1.Actions.DELETE && {
+                    residentStatus: client_1.ResidenceStatus.MOVE_OUT,
+                }),
+            };
+            await tx.resident.update({
+                where: { id: change.residentId },
+                data: {
+                    ...updateData
+                },
+            });
+            return change;
+        });
+    }
 };
 exports.UserService = UserService;
 exports.UserService = UserService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        mail_service_1.MailService])
 ], UserService);
 //# sourceMappingURL=user.service.js.map
