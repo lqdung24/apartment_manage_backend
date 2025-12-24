@@ -1,0 +1,99 @@
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{0}: reset: moving to 25a31365824beaf110ef2897c2efebd7cca6e009
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{1}: checkout: moving from 50d29fb69f74026a1c36b41a09864c05477bcec0 to dev
+[33m50d29fb[m HEAD@{2}: commit: feat: account manage
+[33m38d9a50[m[33m ([m[1;31morigin/dev[m[33m)[m HEAD@{3}: commit: feat: admin create accounts
+[33mff784d2[m HEAD@{4}: checkout: moving from dev to ff784d22b4dd118a62d2969c0b2c7447025dcdf7
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{5}: checkout: moving from dev to dev
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{6}: branch: Reset to origin/dev
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{7}: checkout: moving from fee-resident to dev
+[33m7356d68[m[33m ([m[1;31morigin/fee-resident[m[33m, [m[1;32mfee-resident[m[33m)[m HEAD@{8}: checkout: moving from 25a31365824beaf110ef2897c2efebd7cca6e009 to fee-resident
+[33m25a3136[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev[m[33m)[m HEAD@{9}: checkout: moving from fee-resident to 25a31365824beaf110ef2897c2efebd7cca6e009
+[33m7356d68[m[33m ([m[1;31morigin/fee-resident[m[33m, [m[1;32mfee-resident[m[33m)[m HEAD@{10}: checkout: moving from dev to fee-resident
+[33m6868335[m HEAD@{11}: commit: fix: registration
+[33mb726d16[m HEAD@{12}: checkout: moving from dev to dev
+[33mb726d16[m HEAD@{13}: branch: Reset to origin/dev
+[33mb726d16[m HEAD@{14}: checkout: moving from dev to dev
+[33mb726d16[m HEAD@{15}: branch: Reset to origin/dev
+[33mb726d16[m HEAD@{16}: checkout: moving from registration-admin to dev
+[33m1c45c08[m[33m ([m[1;31morigin/registration-admin[m[33m, [m[1;32mregistration-admin[m[33m)[m HEAD@{17}: commit: feat: khai bao tam tru, tam vang - admin
+[33m87cbd65[m HEAD@{18}: checkout: moving from 87cbd65556061d43024e89419be72854cf38a55a to registration-admin
+[33m87cbd65[m HEAD@{19}: checkout: moving from registration-admin to 87cbd65556061d43024e89419be72854cf38a55a
+[33m87cbd65[m HEAD@{20}: checkout: moving from dev to registration-admin
+[33m87cbd65[m HEAD@{21}: checkout: moving from dev to dev
+[33m87cbd65[m HEAD@{22}: branch: Reset to origin/dev
+[33m87cbd65[m HEAD@{23}: checkout: moving from 87cbd65556061d43024e89419be72854cf38a55a to dev
+[33m87cbd65[m HEAD@{24}: checkout: moving from dev to 87cbd65556061d43024e89419be72854cf38a55a
+[33m87cbd65[m HEAD@{25}: checkout: moving from 87cbd65556061d43024e89419be72854cf38a55a to dev
+[33m87cbd65[m HEAD@{26}: commit: merge
+[33m1fec2c9[m HEAD@{27}: checkout: moving from dev to 1fec2c90698eed7b3885aa39af7e2d2432c78f5e
+[33ma913a33[m HEAD@{28}: checkout: moving from registration to dev
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{29}: checkout: moving from registration to registration
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{30}: branch: Reset to origin/registration
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{31}: checkout: moving from a913a33e885de1aeb389b931434bcf516082240c to registration
+[33ma913a33[m HEAD@{32}: checkout: moving from registration to a913a33e885de1aeb389b931434bcf516082240c
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{33}: checkout: moving from registration to registration
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{34}: branch: Reset to origin/registration
+[33md551870[m[33m ([m[1;31morigin/registration[m[33m, [m[1;32mregistration[m[33m)[m HEAD@{35}: commit: feat: registration
+[33ma913a33[m HEAD@{36}: checkout: moving from dev to registration
+[33ma913a33[m HEAD@{37}: commit: feat: khai bao tam tru, tam vang
+[33m4e8a80b[m HEAD@{38}: checkout: moving from 4e8a80b7de40956f3224a0af0136fd103c97ccfe to dev
+[33m4e8a80b[m HEAD@{39}: checkout: moving from dev to 4e8a80b7de40956f3224a0af0136fd103c97ccfe
+[33m4e8a80b[m HEAD@{40}: checkout: moving from dev to dev
+[33m4e8a80b[m HEAD@{41}: branch: Reset to origin/dev
+[33m554e96b[m HEAD@{42}: checkout: moving from dev to dev
+[33m554e96b[m HEAD@{43}: branch: Reset to origin/dev
+[33m554e96b[m HEAD@{44}: checkout: moving from dev to dev
+[33m554e96b[m HEAD@{45}: branch: Reset to origin/dev
+[33m554e96b[m HEAD@{46}: checkout: moving from dev to dev
+[33m554e96b[m HEAD@{47}: branch: Reset to origin/dev
+[33mec94079[m HEAD@{48}: commit: update schema
+[33m554e96b[m HEAD@{49}: commit: update household api
+[33m79ce68f[m HEAD@{50}: commit: update household api
+[33me8f6e29[m HEAD@{51}: commit: fix household api
+[33me4e4db1[m HEAD@{52}: checkout: moving from e4e4db1f85d30d35deccc61db312bf61aeb3f484 to dev
+[33me4e4db1[m HEAD@{53}: checkout: moving from 87b666b6e4347cb508bcb8367f9aefe413835af1 to e4e4db1f85d30d35deccc61db312bf61aeb3f484
+[33m87b666b[m HEAD@{54}: checkout: moving from e4e4db1f85d30d35deccc61db312bf61aeb3f484 to 87b666b6e4347cb508bcb8367f9aefe413835af1
+[33me4e4db1[m HEAD@{55}: checkout: moving from 707ca1c16300750eafe0a066062b5a33b0ea8e86 to e4e4db1f85d30d35deccc61db312bf61aeb3f484
+[33m707ca1c[m HEAD@{56}: checkout: moving from 87b666b6e4347cb508bcb8367f9aefe413835af1 to 707ca1c16300750eafe0a066062b5a33b0ea8e86
+[33m87b666b[m HEAD@{57}: checkout: moving from dev to 87b666b6e4347cb508bcb8367f9aefe413835af1
+[33me4e4db1[m HEAD@{58}: commit: update jwt, format service
+[33m5bc99b7[m HEAD@{59}: commit: update jwt, format service
+[33m707ca1c[m HEAD@{60}: cherry-pick: update jwt, format service
+[33m87b666b[m HEAD@{61}: checkout: moving from 645e9403249e238e5e4afcb80ff44d8e8eede0ce to dev
+[33m645e940[m HEAD@{62}: commit: update jwt, format service
+[33m87b666b[m HEAD@{63}: checkout: moving from dev to 87b666b6e4347cb508bcb8367f9aefe413835af1
+[33m87b666b[m HEAD@{64}: checkout: moving from dev to dev
+[33m87b666b[m HEAD@{65}: branch: Reset to origin/dev
+[33m87b666b[m HEAD@{66}: rebase (finish): returning to refs/heads/dev
+[33m87b666b[m HEAD@{67}: rebase (start): checkout origin/dev
+[33m3f3b4e5[m HEAD@{68}: rebase (finish): returning to refs/heads/dev
+[33m3f3b4e5[m HEAD@{69}: rebase (start): checkout origin/dev
+[33m2647ca8[m HEAD@{70}: rebase (finish): returning to refs/heads/dev
+[33m2647ca8[m HEAD@{71}: rebase (start): checkout origin/dev
+[33mda0b9c2[m HEAD@{72}: checkout: moving from hoang to dev
+[33meae211d[m[33m ([m[1;32mhoang[m[33m)[m HEAD@{73}: checkout: moving from dev to hoang
+[33mda0b9c2[m HEAD@{74}: rebase (finish): returning to refs/heads/dev
+[33mda0b9c2[m HEAD@{75}: rebase (start): checkout origin/dev
+[33m4215385[m HEAD@{76}: checkout: moving from hoang to dev
+[33mda0b9c2[m HEAD@{77}: commit: add member api
+[33meae211d[m[33m ([m[1;32mhoang[m[33m)[m HEAD@{78}: checkout: moving from dev to hoang
+[33m4215385[m HEAD@{79}: commit: save
+[33m58ab3d5[m HEAD@{80}: commit: reset password
+[33m9c0c6e0[m HEAD@{81}: commit: reset password
+[33m14935c0[m HEAD@{82}: commit: household and head create api
+[33m5b4acac[m HEAD@{83}: commit: refresh token fix
+[33mdd6c43a[m HEAD@{84}: commit: sign out feat
+[33m2ca2cd9[m HEAD@{85}: commit: refresh token fix final
+[33m3c3b5ab[m HEAD@{86}: merge origin/dev: Fast-forward
+[33m31a62c9[m HEAD@{87}: commit: authentication
+[33ma59bb35[m HEAD@{88}: commit: user crud
+[33mb6b5685[m HEAD@{89}: commit: user crud
+[33m79064a5[m HEAD@{90}: commit: user crud
+[33m7b419b8[m HEAD@{91}: commit: user crud basic
+[33m0496a45[m HEAD@{92}: commit: project struct init
+[33mb49b127[m HEAD@{93}: commit: project struct init
+[33m4517e3c[m HEAD@{94}: commit: project struct init
+[33m4b269f1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{95}: checkout: moving from main to dev
+[33m4b269f1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{96}: Branch: renamed refs/heads/main to refs/heads/main
+[33m4b269f1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{98}: Branch: renamed refs/heads/master to refs/heads/main
+[33m4b269f1[m[33m ([m[1;32mmain[m[33m)[m HEAD@{100}: commit (initial): Initial commit

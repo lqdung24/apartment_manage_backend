@@ -22,6 +22,7 @@ const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorater_1 = require("../../common/decorators/roles.decorater");
 const client_1 = require("@prisma/client");
 const ApproveHouseholdChange_1 = require("./ApproveHouseholdChange");
+const update_account_1 = require("./dto/update-account");
 let UserController = class UserController {
     userService;
     constructor(userService) {
@@ -38,6 +39,18 @@ let UserController = class UserController {
     }
     getUsers(page = 1, limit = 10, search) {
         return this.userService.getUsers(page, limit, search);
+    }
+    getSetting(req) {
+        return this.userService.getSetting(req.user.id);
+    }
+    updateAccount(req, dto) {
+        return this.userService.updateAccount(Number(req.user.id), dto);
+    }
+    deleteAccount(req) {
+        return this.userService.deleteAccount(req.user.id);
+    }
+    setRole(userId, role) {
+        return this.userService.setRole(userId, role);
     }
     getDetails(id) {
         return this.userService.userDetails(id);
@@ -99,6 +112,41 @@ __decorate([
     __metadata("design:paramtypes", [Object, Object, String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "getUsers", null);
+__decorate([
+    (0, common_1.Get)('/setting'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "getSetting", null);
+__decorate([
+    (0, common_1.Patch)('/setting/update'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, update_account_1.UpdateAccountDto]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "updateAccount", null);
+__decorate([
+    (0, common_1.Delete)('/delete-account'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt')),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "deleteAccount", null);
+__decorate([
+    (0, common_1.Patch)('role-update'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),
+    (0, roles_decorater_1.Roles)(client_1.Role.ADMIN),
+    __param(0, (0, common_1.Body)('userId')),
+    __param(1, (0, common_1.Body)('role')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Number, String]),
+    __metadata("design:returntype", void 0)
+], UserController.prototype, "setRole", null);
 __decorate([
     (0, common_1.Get)('/:id'),
     (0, common_1.UseGuards)((0, passport_1.AuthGuard)('jwt'), roles_guard_1.RolesGuard),

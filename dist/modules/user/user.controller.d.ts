@@ -1,7 +1,9 @@
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
+import { Role } from '@prisma/client';
 import { ApproveHouseholdChangeDto } from "./ApproveHouseholdChange";
+import { UpdateAccountDto } from "./dto/update-account";
 export declare class UserController {
     private readonly userService;
     constructor(userService: UserService);
@@ -50,6 +52,41 @@ export declare class UserController {
             limit: number;
             totalPages: number;
         };
+    }>;
+    getSetting(req: any): Promise<{
+        username: string;
+        email: string;
+        role: import("@prisma/client").$Enums.Role;
+        id: number;
+    }>;
+    updateAccount(req: any, dto: UpdateAccountDto): Promise<{
+        username: string;
+        email: string;
+        id: number;
+    }>;
+    deleteAccount(req: any): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
+        householdId: number | null;
+        state: import("@prisma/client").$Enums.State;
+        id: number;
+    }>;
+    setRole(userId: number, role: Role): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
+        householdId: number | null;
+        state: import("@prisma/client").$Enums.State;
+        id: number;
     }>;
     getDetails(id: number): Promise<{
         username: string;

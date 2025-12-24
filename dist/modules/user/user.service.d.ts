@@ -1,8 +1,9 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from "../../shared/prisma/prisma.service";
-import { InformationStatus, Prisma } from "@prisma/client";
+import { InformationStatus, Prisma, Role } from "@prisma/client";
 import { UpdateUserRoleDto } from "./dto/update-user-role.dto";
 import { MailService } from "../../common/mail/mail.service";
+import { UpdateAccountDto } from "./dto/update-account";
 export declare class UserService {
     private readonly prisma;
     private mailService;
@@ -165,5 +166,40 @@ export declare class UserService {
         reviewAt: Date | null;
         rejectReason: string | null;
         residentId: number;
+    }>;
+    getSetting(userId: number): Promise<{
+        username: string;
+        email: string;
+        role: import("@prisma/client").$Enums.Role;
+        id: number;
+    }>;
+    updateAccount(userId: number, dto: UpdateAccountDto): Promise<{
+        username: string;
+        email: string;
+        id: number;
+    }>;
+    deleteAccount(userId: number): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
+        householdId: number | null;
+        state: import("@prisma/client").$Enums.State;
+        id: number;
+    }>;
+    setRole(userId: number, role: Role): Promise<{
+        username: string;
+        email: string;
+        password: string;
+        role: import("@prisma/client").$Enums.Role;
+        createtime: Date;
+        resetToken: string | null;
+        resetTokenExpiry: Date | null;
+        householdId: number | null;
+        state: import("@prisma/client").$Enums.State;
+        id: number;
     }>;
 }

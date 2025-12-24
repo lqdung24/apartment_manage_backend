@@ -97,7 +97,6 @@ let UserService = class UserService {
         });
     }
     async getUsers(page = 1, limit = 10, search) {
-        const skip = (page - 1) * limit;
         const where = search && search.trim().length > 0
             ? {
                 OR: [
@@ -122,41 +121,40 @@ let UserService = class UserService {
                 ],
             }
             : undefined;
-        const [data, total] = await this.prisma.$transaction([
-            this.prisma.users.findMany({
-                where,
-                skip,
-                take: limit,
-                orderBy: {
-                    createtime: 'desc',
-                },
-                select: {
-                    id: true,
-                    username: true,
-                    email: true,
-                    role: true,
-                    state: true,
-                    HouseHolds: {
-                        select: {
-                            apartmentNumber: true,
-                            head: {
-                                select: {
-                                    fullname: true,
-                                },
+        const total = await this.prisma.users.count({ where });
+        const totalPages = Math.ceil(total / limit);
+        const currentPage = Math.min(page, totalPages || 1);
+        const skip = (currentPage - 1) * limit;
+        const data = await this.prisma.users.findMany({
+            where,
+            skip,
+            take: limit,
+            orderBy: { createtime: 'desc' },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+                state: true,
+                HouseHolds: {
+                    select: {
+                        apartmentNumber: true,
+                        head: {
+                            select: {
+                                fullname: true,
                             },
                         },
                     },
                 },
-            }),
-            this.prisma.users.count({ where }),
-        ]);
+            },
+        });
         return {
             data: {
                 items: data,
                 total,
-                page,
+                page: currentPage,
                 limit,
-                totalPages: Math.ceil(total / limit),
+                totalPages,
             },
         };
     }
@@ -191,9 +189,6 @@ let UserService = class UserService {
         return this.prisma.users.findFirstOrThrow({
             where: {
                 id,
-                state: {
-                    not: client_1.State.DELETED,
-                },
             },
             select: {
                 id: true,
@@ -320,6 +315,98 @@ let UserService = class UserService {
                 },
             });
             return change;
+        });
+    }
+    async getSetting(userId) {
+        return this.prisma.users.findFirstOrThrow({
+            where: { id: userId },
+            select: {
+                id: true,
+                username: true,
+                email: true,
+                role: true,
+            }
+        });
+    }
+    async updateAccount(userId, dto) {
+        const user = await this.prisma.users.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            throw new common_1.NotFoundException('User not found');
+        }
+        if (dto.email) {
+            const emailExists = await this.prisma.users.findFirst({
+                where: {
+                    email: dto.email,
+                    NOT: { id: userId },
+                },
+            });
+            if (emailExists) {
+                throw new common_1.BadRequestException('Email already exists');
+            }
+        }
+        if (dto.username) {
+            const usernameExists = await this.prisma.users.findFirst({
+                where: {
+                    username: dto.username,
+                    NOT: { id: userId },
+                },
+            });
+            if (usernameExists) {
+                throw new common_1.BadRequestException('Username already exists');
+            }
+        }
+        const updateData = {};
+        if (dto.email)
+            updateData.email = dto.email;
+        if (dto.username)
+            updateData.username = dto.username;
+        if (dto.newPassword || dto.oldPassword) {
+            if (!dto.oldPassword || !dto.newPassword) {
+                throw new common_1.BadRequestException('Old password and new password are required');
+            }
+            const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
+            if (!isMatch) {
+                throw new common_1.BadRequestException('Old password is incorrect');
+            }
+            const isSame = await bcrypt.compare(dto.newPassword, user.password);
+            if (isSame) {
+                throw new common_1.BadRequestException('New password must be different from old password');
+            }
+            updateData.password = await bcrypt.hash(dto.newPassword, 10);
+        }
+        return this.prisma.users.update({
+            where: { id: userId },
+            data: updateData,
+            select: {
+                id: true,
+                email: true,
+                username: true,
+            },
+        });
+    }
+    async deleteAccount(userId) {
+        const record = await this.prisma.users.update({
+            where: { id: userId },
+            data: { state: client_1.State.DELETED }
+        });
+        if (record.householdId) {
+            await this.prisma.houseHolds.update({
+                where: { id: record.householdId },
+                data: { status: client_1.HouseHoldStatus.DELETE }
+            });
+        }
+        return record;
+    }
+    async setRole(userId, role) {
+        const updateData = { role };
+        if (role !== client_1.Role.USER) {
+            updateData.state = client_1.State.ACTIVE;
+        }
+        return this.prisma.users.update({
+            where: { id: userId },
+            data: updateData,
         });
     }
 };

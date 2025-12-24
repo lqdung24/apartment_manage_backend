@@ -18,6 +18,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorater';
 import { Role } from '@prisma/client';
 import {ApproveHouseholdChangeDto} from "./ApproveHouseholdChange";
+import {UpdateAccountDto} from "./dto/update-account";
 
 @Controller('user')
 export class UserController {
@@ -53,6 +54,35 @@ export class UserController {
     return this.userService.getUsers(page, limit, search);
   }
 
+  @Get('/setting')
+  @UseGuards(AuthGuard('jwt'))
+  getSetting(@Req() req){
+    return this.userService.getSetting(req.user.id)
+  }
+
+  @Patch('/setting/update')
+  @UseGuards(AuthGuard('jwt'))
+  updateAccount(
+    @Req() req,
+    @Body() dto: UpdateAccountDto,
+  ) {
+    return this.userService.updateAccount(Number(req.user.id), dto);
+  }
+  @Delete('/delete-account')
+  @UseGuards(AuthGuard('jwt'))
+  deleteAccount(@Req() req){
+    return this.userService.deleteAccount(req.user.id)
+  }
+
+  @Patch('role-update')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  setRole(
+    @Body('userId') userId: number,
+    @Body('role') role: Role
+  ){
+    return this.userService.setRole(userId, role)
+  }
 
   @Get('/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)

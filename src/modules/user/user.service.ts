@@ -8,6 +8,7 @@ import * as bcrypt from 'bcrypt';
 import {randomBytes} from "node:crypto";
 import {MailService} from "../../common/mail/mail.service";
 import now = jest.now;
+import {UpdateAccountDto} from "./dto/update-account";
 
 @Injectable()
 export class UserService {
@@ -61,8 +62,6 @@ export class UserService {
 
 
   async getUsers(page = 1, limit = 10, search?: string) {
-    const skip = (page - 1) * limit;
-
     const where: Prisma.UsersWhereInput | undefined =
       search && search.trim().length > 0
         ? {
@@ -89,49 +88,51 @@ export class UserService {
         }
         : undefined;
 
+    const total = await this.prisma.users.count({ where });
 
-    const [data, total] = await this.prisma.$transaction([
-      this.prisma.users.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: {
-          createtime: 'desc',
-        },
-        select: {
-          id: true,
-          username: true,
-          email: true,
-          role: true,
-          state: true,
-          HouseHolds: {
-            select: {
-              apartmentNumber: true,
-              head: {
-                select: {
-                  fullname: true,
-                },
+// Điều chỉnh page nếu vượt quá tổng
+    const totalPages = Math.ceil(total / limit);
+    const currentPage = Math.min(page, totalPages || 1); // đảm bảo >= 1
+    const skip = (currentPage - 1) * limit;
+
+// Lấy data
+    const data = await this.prisma.users.findMany({
+      where,
+      skip,
+      take: limit,
+      orderBy: { createtime: 'desc' },
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+        state: true,
+        HouseHolds: {
+          select: {
+            apartmentNumber: true,
+            head: {
+              select: {
+                fullname: true,
               },
             },
           },
         },
-      }),
-      this.prisma.users.count({ where }),
-    ]);
+      },
+    });
 
     return {
       data: {
         items: data,
         total,
-        page,
+        page: currentPage,
         limit,
-        totalPages: Math.ceil(total / limit),
+        totalPages,
       },
     };
   }
 
 
-async deleteUsers(ids: number[]) {
+  async deleteUsers(ids: number[]) {
     return this.prisma.$transaction(async (tx) => {
       // soft delete households liên quan
       await tx.houseHolds.updateMany({
@@ -166,9 +167,6 @@ async deleteUsers(ids: number[]) {
     return this.prisma.users.findFirstOrThrow({
       where: {
         id,
-        state: {
-          not: State.DELETED,
-        },
       },
       select: {
         id: true,
@@ -338,6 +336,122 @@ async deleteUsers(ids: number[]) {
       });
 
       return change;
+    });
+  }
+  async getSetting(userId: number){
+    return this.prisma.users.findFirstOrThrow({
+      where: {id: userId},
+      select: {
+        id: true,
+        username: true,
+        email: true,
+        role: true,
+      }
+    })
+  }
+
+
+  async updateAccount(userId: number, dto: UpdateAccountDto) {
+    const user = await this.prisma.users.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // ✅ check email trùng
+    if (dto.email) {
+      const emailExists = await this.prisma.users.findFirst({
+        where: {
+          email: dto.email,
+          NOT: { id: userId },
+        },
+      });
+
+      if (emailExists) {
+        throw new BadRequestException('Email already exists');
+      }
+    }
+
+    // ✅ check username trùng
+    if (dto.username) {
+      const usernameExists = await this.prisma.users.findFirst({
+        where: {
+          username: dto.username,
+          NOT: { id: userId },
+        },
+      });
+
+      if (usernameExists) {
+        throw new BadRequestException('Username already exists');
+      }
+    }
+
+    const updateData: any = {};
+
+    if (dto.email) updateData.email = dto.email;
+    if (dto.username) updateData.username = dto.username;
+
+    // 🔐 XỬ LÝ ĐỔI MẬT KHẨU
+    if (dto.newPassword || dto.oldPassword) {
+      // ❌ thiếu 1 trong 2
+      if (!dto.oldPassword || !dto.newPassword) {
+        throw new BadRequestException(
+          'Old password and new password are required',
+        );
+      }
+
+      // ❌ mật khẩu cũ sai
+      const isMatch = await bcrypt.compare(dto.oldPassword, user.password);
+      if (!isMatch) {
+        throw new BadRequestException('Old password is incorrect');
+      }
+
+      // ❌ mật khẩu mới trùng mật khẩu cũ
+      const isSame = await bcrypt.compare(dto.newPassword, user.password);
+      if (isSame) {
+        throw new BadRequestException(
+          'New password must be different from old password',
+        );
+      }
+
+      updateData.password = await bcrypt.hash(dto.newPassword, 10);
+    }
+
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: updateData,
+      select: {
+        id: true,
+        email: true,
+        username: true,
+      },
+    });
+  }
+  async deleteAccount(userId: number){
+    const record = await this.prisma.users.update({
+      where: {id: userId},
+      data: {state: State.DELETED}
+    })
+    if(record.householdId) {
+      await this.prisma.houseHolds.update({
+        where: {id: record.householdId},
+        data: {status: HouseHoldStatus.DELETE}
+      })
+    }
+    return record
+  }
+  async setRole(userId: number, role: Role) {
+    const updateData: any = { role };
+
+    if (role !== Role.USER) {
+      updateData.state = State.ACTIVE;
+    }
+
+    return this.prisma.users.update({
+      where: { id: userId },
+      data: updateData, // ✅ trực tiếp
     });
   }
 
