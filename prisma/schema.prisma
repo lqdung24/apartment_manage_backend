@@ -51,6 +51,8 @@ model HouseHolds {
   ward            String
   province        String
   status          HouseHoldStatus @default(ACTIVE)
+  numCars         Int @default(0)
+  numMotorbike    Int @default(0)
   informationStatus InformationStatus @default(PENDING)
   createtime      DateTime        @default(now())
   headID          Int             @unique
@@ -98,14 +100,34 @@ model Fee {
   id            Int             @id @default(autoincrement())
   name          String
   description   String?
-  type          FeeType
-  frequency     FeeFrequency
-  ratePerPerson Float?
-  minium        Float?          @default(0)
-  startDate     DateTime?
-  endDate       DateTime?
+  isMandatory   Boolean? @default(true)
+  frequency     Frequency
+  rate          Float?  @default(0)
+  calculationBase FeeCalculationBase @default(PER_HOUSEHOLD)
+  anchorDay     Int?
+  anchorMonth   Int?
+  status        FeeStatus  @default(PAUSED)
   createdAt     DateTime        @default(now())
   assignments   FeeAssignment[]
+}
+
+enum FeeStatus {
+  ACTIVE     // đang thu
+  PAUSED     // tạm dừng
+  STOPPED    // ngừng vĩnh viễn
+}
+
+enum Frequency {
+  ONE_TIME
+  MONTHLY
+  YEARLY
+}
+
+enum FeeCalculationBase {
+  PER_PERSON
+  PER_HOUSEHOLD
+  PER_MOTORBIKE
+  PER_CAR
 }
 
 model FeeAssignment {
@@ -113,6 +135,7 @@ model FeeAssignment {
   feeId       Int
   householdId Int
   amountDue   Float
+  startDate   DateTime   @default(now())
   dueDate     DateTime
   isPaid      Boolean    @default(false)
   fee         Fee        @relation(fields: [feeId], references: [id])
@@ -123,7 +146,7 @@ model FeeAssignment {
 model Payment {
   id              Int           @id @default(autoincrement())
   feeAssignmentId Int           @unique
-  amountPaid      Float
+  amountPaid      Float?      // for optional fee
   imageUrl        String? 
   imagePath       String?
   status          InformationStatus @default(PENDING)
@@ -240,16 +263,4 @@ enum Actions {
   CREATE
   DELETE
   UPDATE
-}
-
-// fee
-enum FeeType {
-  MANDATORY
-  VOLUNTARY
-}
-
-enum FeeFrequency {
-  ONE_TIME
-  MONTHLY
-  YEARLY
 }

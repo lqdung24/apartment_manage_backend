@@ -35,4 +35,12 @@ export class CreateHouseHoldDto {
   @IsEnum(InformationStatus)
   @IsOptional()
   informationStatus?: InformationStatus
+
+  @IsNumber()
+  @IsOptional()
+  numCars?: number
+
+  @IsNumber()
+  @IsOptional()
+  numMotorbike?: number
 }

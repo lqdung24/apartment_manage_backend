@@ -32,6 +32,8 @@ export class HouseHoldService {
         ward: dto.household.ward,
         province: dto.household.province,
         status: HouseHoldStatus.ACTIVE,
+        numCars: dto.household.numCars,
+        numMotorbike: dto.household.numMotorbike,
         account: { connect: { id: userId } },  // connect user
         head: { connect: { id: resident.id } }, // connect resident chủ hộ
       },

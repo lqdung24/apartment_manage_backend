@@ -1,10 +1,25 @@
-import { Body, Controller, Get, Post, Patch, Delete, Param, ParseIntPipe, UseGuards, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Patch,
+  Delete,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+  Query,
+  UseInterceptors, UploadedFile
+} from '@nestjs/common';
 import { FeeService } from './fee.service';
 import { CreateFeeDto } from './dto/create-fee.dto';
 import { CreateFeeAssignmentDto } from './dto/create-assignment.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { Roles } from 'src/common/decorators/roles.decorater';
 import { RolesGuard } from 'src/common/guards/roles.guard';
+import {Role} from "@prisma/client";
+import {CreateAndAssignFeeDto} from "./dto/create-and-assign-fee.dto";
+import {FileInterceptor} from "@nestjs/platform-express";
 
 @Controller('fee')
 @UseGuards(AuthGuard('jwt'), RolesGuard)
@@ -12,9 +27,17 @@ export class FeeController {
   constructor(private readonly feeService: FeeService) {}
 
   @Roles ('ADMIN')
-  @Post()
-  create(@Body() createFeeDto: CreateFeeDto) {
-    return this.feeService.create(createFeeDto);
+  @Post('repeat')
+  createFee(@Body() createFeeDto: CreateFeeDto) {
+    return this.feeService.createFeeRepeat(createFeeDto);
+  }
+
+  //ok
+  @Post('onetime-fee')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  createOneTimeFee(@Body() dto: CreateAndAssignFeeDto){
+    return this.feeService.createOneTimeFee(dto)
   }
 
   @Roles ('ADMIN')
@@ -22,7 +45,8 @@ export class FeeController {
   assign(@Body() dto: CreateFeeAssignmentDto) {
     return this.feeService.assignFee(dto);
   }
-  
+
+  //ok
   @Get(':id/detail')
   detail(
     @Param('id', ParseIntPipe) id: number,
@@ -35,6 +59,23 @@ export class FeeController {
       limit, 
       isPaid 
     });
+  }
+
+  @Get(':id/:householdid/payment')
+  householdPayment(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('householdid', ParseIntPipe) householdid: number,
+  ) {
+    return this.feeService.getHouseholdPayment(id, householdid);
+  }
+
+  @Post('import')
+  @UseInterceptors(FileInterceptor('file'))
+  importFeeExcel(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() dto: CreateAndAssignFeeDto
+  ) {
+    return this.feeService.createFeeFromExcel(file, dto);
   }
 
   @Get('household/:id')
@@ -53,7 +94,7 @@ export class FeeController {
   }
 
   @Roles ('ADMIN')
-  @Get()
+  @Get('all')
   findAll(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -75,7 +116,7 @@ export class FeeController {
   @Roles ('ADMIN')
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<CreateFeeDto>) {
-    return this.feeService.update(Number(id), dto);
+    return this.feeService.updateFeeAssignment(Number(id), dto);
   }
 
   @Roles ('ADMIN')

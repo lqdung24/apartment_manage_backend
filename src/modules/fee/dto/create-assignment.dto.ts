@@ -9,5 +9,4 @@ export class CreateFeeAssignmentDto {
 
   @IsDateString()
   dueDate: string;
-
 }

@@ -1,5 +1,6 @@
-import { IsEnum, IsOptional, IsString, IsNumber } from 'class-validator';
-import { FeeType, FeeFrequency } from '@prisma/client';
+import {IsEnum, IsOptional, IsString, IsNumber, IsBoolean, IsDateString} from 'class-validator';
+import {FeeCalculationBase, Frequency} from '@prisma/client';
+import { Transform, Type } from 'class-transformer';
 
 export class CreateFeeDto {
   @IsString()
@@ -9,23 +10,27 @@ export class CreateFeeDto {
   @IsString()
   description?: string;
 
-  @IsEnum(FeeType)
-  type: FeeType;
+  @Transform(({ value }) => value === 'true')
+  @IsBoolean()
+  isMandatory: boolean
 
-  @IsEnum(FeeFrequency)
-  frequency: FeeFrequency;
+  @IsEnum(Frequency)
+  frequency: Frequency;
 
+  @Transform(({ value }) => Number(value))
   @IsOptional()
   @IsNumber()
-  ratePerPerson?: number;
+  rate?: number;
 
   @IsOptional()
+  @IsEnum(FeeCalculationBase)
+  calculationBase?: FeeCalculationBase;
+
   @IsNumber()
-  minium?: number;
-
   @IsOptional()
-  startDate?: string;
+  anchorDay?: number;
 
+  @IsNumber()
   @IsOptional()
-  endDate?: string;
+  anchorMonth?: number;
 }

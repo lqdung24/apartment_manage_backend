@@ -66,7 +66,7 @@ let AuthService = class AuthService {
             data: { ...dto, password: hashed, role: client_1.Role.USER },
         });
         const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), {
-            expiresIn: '15m',
+            expiresIn: '3d',
         });
         const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
             expiresIn: '7d',
@@ -81,7 +81,7 @@ let AuthService = class AuthService {
         if (!match)
             throw new common_1.UnauthorizedException('Wrong password');
         const accessToken = jwt.sign({ id: user.id, role: user.role }, this.configService.get('JWT_SECRET'), {
-            expiresIn: '15m',
+            expiresIn: '3d',
         });
         const refreshToken = jwt.sign({ id: user.id }, this.configService.get('JWT_REFRESH_SECRET'), {
             expiresIn: '7d',
@@ -89,7 +89,7 @@ let AuthService = class AuthService {
         return { user, accessToken, refreshToken };
     }
     async refresh(user2) {
-        const accessToken = jwt.sign({ id: user2.id, role: user2.role }, this.configService.get('JWT_SECRET'), { expiresIn: '15m' });
+        const accessToken = jwt.sign({ id: user2.id, role: user2.role }, this.configService.get('JWT_SECRET'), { expiresIn: '3d' });
         const user = await this.prisma.users.findUniqueOrThrow({
             where: { id: user2.id },
         });

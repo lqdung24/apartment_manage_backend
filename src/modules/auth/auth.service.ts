@@ -30,7 +30,7 @@ export class AuthService {
       { id: user.id, role: user.role },
       this.configService.get<string>('JWT_SECRET')!,
       {
-        expiresIn: '15m',
+        expiresIn: '3d',
       },
     );
 
@@ -57,7 +57,7 @@ export class AuthService {
       { id: user.id, role: user.role },
       this.configService.get<string>('JWT_SECRET')!,
       {
-        expiresIn: '15m',
+        expiresIn: '3d',
       },
     );
 
@@ -76,7 +76,7 @@ export class AuthService {
     const accessToken = jwt.sign(
       {id: user2.id, role: user2.role},
       this.configService.get<string>('JWT_SECRET')!,
-      { expiresIn: '15m' }
+      { expiresIn: '3d' }
     )
 
     const user = await this.prisma.users.findUniqueOrThrow({
