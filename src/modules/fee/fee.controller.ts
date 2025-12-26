@@ -40,6 +40,20 @@ export class FeeController {
     return this.feeService.createOneTimeFee(dto)
   }
 
+  @Get('repeat-fee')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  getRepeatFee(){
+    return this.feeService.getRepeatFee()
+  }
+
+  @Delete('repeat-fee/:id')
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(Role.ADMIN)
+  deleteRepeatFee(@Param('id', ParseIntPipe) id: number){
+    return this.feeService.deleteRepeatFee(id)
+  }
+
   @Roles ('ADMIN')
   @Post('assign')
   assign(@Body() dto: CreateFeeAssignmentDto) {

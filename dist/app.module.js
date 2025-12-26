@@ -18,6 +18,7 @@ const admin_module_1 = require("./modules/admin/admin.module");
 const fee_module_1 = require("./modules/fee/fee.module");
 const payment_module_1 = require("./modules/payment/payment.module");
 const registration_module_1 = require("./modules/registration/registration.module");
+const schedule_1 = require("@nestjs/schedule");
 let AppModule = class AppModule {
     configure(consumer) {
         consumer.apply(logger_middleware_1.LoggerMiddleware).forRoutes('*');
@@ -33,6 +34,7 @@ exports.AppModule = AppModule = __decorate([
             fee_module_1.FeeModule,
             payment_module_1.PaymentModule,
             registration_module_1.RegistrationModule,
+            schedule_1.ScheduleModule.forRoot(),
         ],
     })
 ], AppModule);

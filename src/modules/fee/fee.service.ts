@@ -65,12 +65,22 @@ export class FeeService {
 
   }
 
+  async getRepeatFee(){
+    return this.prisma.repeatfee.findMany({
+    })
+  }
+
+  async deleteRepeatFee(id: number){
+    return this.prisma.repeatfee.delete({
+      where: {id}
+    })
+  }
   //ok
   async createOneTimeFee(dto: CreateAndAssignFeeDto) {
     if(dto.frequency != Frequency.ONE_TIME){
       throw new BadRequestException("this only for non repeatedly fee")
     }
-    const {dueDate, ...data} = dto
+    const {dueDate, frequency,...data} = dto
     const fee = await this.prisma.fee.create({
       data: {
         ...data,
@@ -83,7 +93,7 @@ export class FeeService {
     if(dto.frequency == Frequency.ONE_TIME){
       throw new BadRequestException("this only for repeatedly fee")
     }
-    return this.prisma.fee.create({
+    return this.prisma.repeatfee.create({
       data: {
         ...dto,
       }
@@ -345,7 +355,6 @@ export class FeeService {
     });
   }
 
-
   async remove (id: number){
     await this.findOne(id);
 
@@ -393,8 +402,6 @@ export class FeeService {
     if (!fee) throw new NotFoundException('Không tìm thấy khoản phí');
     return fee;
   }
-
-
 
   async getFeeDetail(
     feeId: number,
@@ -499,4 +506,6 @@ export class FeeService {
       include: { fee: true }
     });
   }
+
+
 }

@@ -9,6 +9,7 @@ import { AdminModule } from './modules/admin/admin.module';
 import { FeeModule } from './modules/fee/fee.module';
 import { PaymentModule } from './modules/payment/payment.module';
 import {RegistrationModule} from "./modules/registration/registration.module";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
   imports: [PrismaModule, UserModule, AuthModule,
@@ -18,6 +19,7 @@ import {RegistrationModule} from "./modules/registration/registration.module";
     FeeModule,
     PaymentModule,
     RegistrationModule,
+    ScheduleModule.forRoot(),
   ],
 })
 export class AppModule implements NestModule{

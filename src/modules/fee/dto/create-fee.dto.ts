@@ -10,7 +10,10 @@ export class CreateFeeDto {
   @IsString()
   description?: string;
 
-  @Transform(({ value }) => value === 'true')
+  @Transform(({ value }) => {
+    if (typeof value === 'boolean') return value;
+    return value === 'true';
+  })
   @IsBoolean()
   isMandatory: boolean
 
