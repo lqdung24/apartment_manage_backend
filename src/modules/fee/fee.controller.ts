@@ -26,7 +26,7 @@ import {FileInterceptor} from "@nestjs/platform-express";
 export class FeeController {
   constructor(private readonly feeService: FeeService) {}
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Post('repeat')
   createFee(@Body() createFeeDto: CreateFeeDto) {
     return this.feeService.createFeeRepeat(createFeeDto);
@@ -35,32 +35,33 @@ export class FeeController {
   //ok
   @Post('onetime-fee')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
   createOneTimeFee(@Body() dto: CreateAndAssignFeeDto){
     return this.feeService.createOneTimeFee(dto)
   }
 
   @Get('repeat-fee')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
   getRepeatFee(){
     return this.feeService.getRepeatFee()
   }
 
   @Delete('repeat-fee/:id')
   @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles(Role.ADMIN)
+  @Roles(Role.ADMIN, Role.ACCOUNTANT)
   deleteRepeatFee(@Param('id', ParseIntPipe) id: number){
     return this.feeService.deleteRepeatFee(id)
   }
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Post('assign')
   assign(@Body() dto: CreateFeeAssignmentDto) {
     return this.feeService.assignFee(dto);
   }
 
   //ok
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get(':id/detail')
   detail(
     @Param('id', ParseIntPipe) id: number,
@@ -75,6 +76,7 @@ export class FeeController {
     });
   }
 
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get(':id/:householdid/payment')
   householdPayment(
     @Param('id', ParseIntPipe) id: number,

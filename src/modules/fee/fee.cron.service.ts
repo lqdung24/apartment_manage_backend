@@ -29,7 +29,7 @@ export class FeeCronService {
     }
   }
 
-  @Cron('0 */2 * * * *', {
+  @Cron('0 0 0 * * *', {
     timeZone: 'Europe/Paris',
   })
   async handleDailyJob() {
