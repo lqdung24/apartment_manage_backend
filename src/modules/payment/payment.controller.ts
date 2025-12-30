@@ -47,8 +47,11 @@ export class PaymentController {
   // 3) Admin approve
   @Patch(':id/approve')
   @Roles('ADMIN')
-  approve(@Param('id', ParseIntPipe) id: number) {
-    return this.paymentService.approvePayment(id);
+  approve(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body:{amount?: number}
+  ) {
+    return this.paymentService.approvePayment(id, body.amount);
   }
 
   // 4) Admin reject

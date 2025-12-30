@@ -53,22 +53,27 @@ export class PaymentService {
             },
         });
     }
-    async approvePayment (paymentId: number){
+    async approvePayment (paymentId: number, amount?: number){
         const payment = await this.prisma.payment.findUnique({
-            where: {id: paymentId}
+            where: {id: paymentId},
+            include: {FeeAssignment: true}
         })
         if(!payment) throw new NotFoundException('Payment không tồn tại');
 
-        // update isPaid assignment
-        await this.prisma.feeAssignment.update({
-            where: {id: payment.feeAssignmentId},
-            data: {isPaid: true},
-        });
-
-        return this.prisma.payment.update({
-            where: {id: paymentId},
-            data: {status: 'APPROVED'},
-        });
+        const finalAmount = amount !== undefined ? amount : (payment.amountPaid || 0);
+        return this.prisma.$transaction([
+            this.prisma.payment.update({
+                where: { id: paymentId },
+                data: { status: 'APPROVED' },
+            }),
+            this.prisma.feeAssignment.update({
+                where: { id: payment.feeAssignmentId },
+                data: { 
+                    isPaid: true,
+                    amountDue: finalAmount 
+                },
+            })
+        ]);
     }
 
     // admin reject (write note)

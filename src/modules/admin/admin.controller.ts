@@ -20,4 +20,9 @@ export class AdminController {
   getHouseholdDetail(@Param('id') id: string) {
     return this.adminService.getHouseholdDetail(Number(id));
   }
+  @Get('dashboard/stats')
+  @Roles('ADMIN')
+  getDashboardStats() {
+    return this.adminService.getDashboardStats();
+  }
 }

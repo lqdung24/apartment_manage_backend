@@ -426,7 +426,7 @@ export class FeeService {
       whereCondition.isPaid = false;
     }
 
-    const [assignments, total] = await Promise.all([
+    const [assignments, total, allStats, paidStats] = await Promise.all([
       this.prisma.feeAssignment.findMany({
         where: whereCondition,
         skip: Number(skip),
@@ -451,10 +451,28 @@ export class FeeService {
         }
       }),
       this.prisma.feeAssignment.count({ where: whereCondition }),
+
+      this.prisma.feeAssignment.aggregate({
+        where:{feeId: feeId},
+        _sum: {amountDue: true},
+        _count:{_all: true}
+      }),
+
+      this.prisma.feeAssignment.aggregate({
+        where: { feeId: feeId, isPaid: true },
+        _sum: { amountDue: true },
+        _count: { _all: true }
+      })
     ]);
 
     return {
       ...fee,
+      statistics: {
+        totalAmount: allStats._sum.amountDue || 0,        
+        collectedAmount: paidStats._sum.amountDue || 0,  
+        totalHouseholds: allStats._count._all || 0,       
+        paidHouseholds: paidStats._count._all || 0        
+      },
       assignments: {
         data: assignments,
         meta: {

@@ -109,7 +109,7 @@ export class FeeController {
     return this.feeService.getUnpaidFees(Number(id));
   }
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get('all')
   findAll(
     @Query('page') page?: string,
@@ -123,19 +123,19 @@ export class FeeController {
     });
   }
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
       return this.feeService.findOne(id);
   }
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: Partial<CreateFeeDto>) {
     return this.feeService.updateFeeAssignment(Number(id), dto);
   }
 
-  @Roles ('ADMIN')
+  @Roles ('ADMIN', Role.ACCOUNTANT)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.feeService.remove(Number(id));

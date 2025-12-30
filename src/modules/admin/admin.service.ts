@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/shared/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { GetHouseholdsQueryDto } from './dto/get-households.dto';
+import { InformationStatus, HouseHoldStatus, ResidenceStatus } from '@prisma/client';
 @Injectable()
 export class AdminService {
     constructor(private readonly prisma: PrismaService ){}
@@ -69,5 +70,44 @@ export class AdminService {
 
   async createAccounts(num: number){
 
+  }
+
+  async getDashboardStats() {
+    const [
+      totalHouseholds,
+      occupiedHouseholds,
+      totalResidents,
+      pendingTempResidents,
+      pendingTempAbsents,
+    ] = await Promise.all([
+      this.prisma.houseHolds.count({
+        where: { status: { not: HouseHoldStatus.DELETE } }
+      }),
+
+      this.prisma.houseHolds.count({
+        where: { status: HouseHoldStatus.ACTIVE }
+      }),
+
+      this.prisma.resident.count({
+        where: {
+          residentStatus: { in: [ResidenceStatus.NORMAL, ResidenceStatus.TEMP_RESIDENT] }
+        }
+      }),
+
+      this.prisma.temporaryResident.count({
+        where: { informationStatus: InformationStatus.PENDING }
+      }),
+
+      this.prisma.temporaryAbsence.count({
+        where: { informationStatus: InformationStatus.PENDING }
+      }),
+    ]);
+
+    return {
+      totalHouseholds,
+      occupiedHouseholds,
+      totalResidents,
+      pendingRequests: pendingTempResidents + pendingTempAbsents,
+    };
   }
 }
