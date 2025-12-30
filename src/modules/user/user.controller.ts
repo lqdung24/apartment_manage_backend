@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UseGuards, Query, Req,
+  UseGuards, Query, Req, ParseEnumPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -16,7 +16,7 @@ import { UpdateUserRoleDto } from './dto/update-user-role.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorater';
-import { Role } from '@prisma/client';
+import {Role, State} from '@prisma/client';
 import {ApproveHouseholdChangeDto} from "./ApproveHouseholdChange";
 import {UpdateAccountDto} from "./dto/update-account";
 
@@ -50,9 +50,12 @@ export class UserController {
     @Query('page', new ParseIntPipe({ optional: true })) page = 1,
     @Query('limit', new ParseIntPipe({ optional: true })) limit = 10,
     @Query('search') search?: string,
+    @Query('state', new ParseEnumPipe(State, { optional: true }))
+    state?: State,
   ) {
-    return this.userService.getUsers(page, limit, search);
+    return this.userService.getUsers(page, limit, search, state);
   }
+
 
   @Get('/setting')
   @UseGuards(AuthGuard('jwt'))

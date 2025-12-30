@@ -37,8 +37,8 @@ let UserController = class UserController {
     createAccounts(num) {
         return this.userService.createAccounts(num);
     }
-    getUsers(page = 1, limit = 10, search) {
-        return this.userService.getUsers(page, limit, search);
+    getUsers(page = 1, limit = 10, search, state) {
+        return this.userService.getUsers(page, limit, search, state);
     }
     getSetting(req) {
         return this.userService.getSetting(req.user.id);
@@ -108,8 +108,9 @@ __decorate([
     __param(0, (0, common_1.Query)('page', new common_1.ParseIntPipe({ optional: true }))),
     __param(1, (0, common_1.Query)('limit', new common_1.ParseIntPipe({ optional: true }))),
     __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('state', new common_1.ParseEnumPipe(client_1.State, { optional: true }))),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:paramtypes", [Object, Object, String, String]),
     __metadata("design:returntype", void 0)
 ], UserController.prototype, "getUsers", null);
 __decorate([

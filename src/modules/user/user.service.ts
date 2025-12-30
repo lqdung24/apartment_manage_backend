@@ -61,32 +61,39 @@ export class UserService {
   }
 
 
-  async getUsers(page = 1, limit = 10, search?: string) {
-    const where: Prisma.UsersWhereInput | undefined =
-      search && search.trim().length > 0
-        ? {
-          OR: [
-            {
-              email: {
-                contains: search,
-                mode: Prisma.QueryMode.insensitive,
-              },
+  async getUsers(
+    page = 1,
+    limit = 10,
+    search?: string,
+    state?: State,
+  ) {
+    const where: Prisma.UsersWhereInput = {
+      ...(search && search.trim().length > 0 && {
+        OR: [
+          {
+            email: {
+              contains: search,
+              mode: Prisma.QueryMode.insensitive,
             },
-            {
-              HouseHolds: {
-                is: {
-                  head: {
-                    fullname: {
-                      contains: search,
-                      mode: Prisma.QueryMode.insensitive,
-                    },
+          },
+          {
+            HouseHolds: {
+              is: {
+                head: {
+                  fullname: {
+                    contains: search,
+                    mode: Prisma.QueryMode.insensitive,
                   },
                 },
               },
             },
-          ],
-        }
-        : undefined;
+          },
+        ],
+      }),
+      ...(state && {
+        state,
+      }),
+    };
 
     const total = await this.prisma.users.count({ where });
 

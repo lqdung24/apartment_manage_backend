@@ -8,10 +8,19 @@ CREATE TYPE "Role" AS ENUM ('USER', 'ADMIN', 'ACCOUNTANT');
 CREATE TYPE "HouseHoldStatus" AS ENUM ('ACTIVE', 'MOVED', 'DELETE');
 
 -- CreateEnum
+CREATE TYPE "FeeStatus" AS ENUM ('ACTIVE', 'PAUSED', 'STOPPED');
+
+-- CreateEnum
+CREATE TYPE "Frequency" AS ENUM ('ONE_TIME', 'MONTHLY', 'YEARLY');
+
+-- CreateEnum
+CREATE TYPE "FeeCalculationBase" AS ENUM ('PER_PERSON', 'PER_HOUSEHOLD', 'PER_MOTORBIKE', 'PER_CAR');
+
+-- CreateEnum
 CREATE TYPE "ResidenceStatus" AS ENUM ('NORMAL', 'TEMP_ABSENT', 'TEMP_RESIDENT', 'MOVE_OUT');
 
 -- CreateEnum
-CREATE TYPE "InformationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'ENDED');
+CREATE TYPE "InformationStatus" AS ENUM ('PENDING', 'APPROVED', 'REJECTED', 'DELETING', 'ENDED');
 
 -- CreateEnum
 CREATE TYPE "Gender" AS ENUM ('MALE', 'FEMALE');
@@ -21,12 +30,6 @@ CREATE TYPE "RelationshipToHead" AS ENUM ('HEAD', 'WIFE', 'HUSBAND', 'SON', 'DAU
 
 -- CreateEnum
 CREATE TYPE "Actions" AS ENUM ('CREATE', 'DELETE', 'UPDATE');
-
--- CreateEnum
-CREATE TYPE "FeeType" AS ENUM ('MANDATORY', 'VOLUNTARY');
-
--- CreateEnum
-CREATE TYPE "FeeFrequency" AS ENUM ('ONE_TIME', 'MONTHLY', 'YEARLY');
 
 -- CreateTable
 CREATE TABLE "Users" (
@@ -54,6 +57,9 @@ CREATE TABLE "HouseHolds" (
     "ward" TEXT NOT NULL,
     "province" TEXT NOT NULL,
     "status" "HouseHoldStatus" NOT NULL DEFAULT 'ACTIVE',
+    "numCars" INTEGER NOT NULL DEFAULT 0,
+    "numMotorbike" INTEGER NOT NULL DEFAULT 0,
+    "informationStatus" "InformationStatus" NOT NULL DEFAULT 'PENDING',
     "createtime" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "headID" INTEGER NOT NULL,
     "userID" INTEGER,
@@ -86,15 +92,32 @@ CREATE TABLE "Fee" (
     "id" SERIAL NOT NULL,
     "name" TEXT NOT NULL,
     "description" TEXT,
-    "type" "FeeType" NOT NULL,
-    "frequency" "FeeFrequency" NOT NULL,
-    "ratePerPerson" DOUBLE PRECISION,
-    "minium" DOUBLE PRECISION DEFAULT 0,
-    "startDate" TIMESTAMP(3),
-    "endDate" TIMESTAMP(3),
+    "isMandatory" BOOLEAN DEFAULT true,
+    "rate" DOUBLE PRECISION DEFAULT 0,
+    "calculationBase" "FeeCalculationBase" NOT NULL DEFAULT 'PER_HOUSEHOLD',
+    "anchorDay" INTEGER,
+    "anchorMonth" INTEGER,
+    "status" "FeeStatus" NOT NULL DEFAULT 'ACTIVE',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Fee_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "Repeatfee" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "description" TEXT,
+    "isMandatory" BOOLEAN DEFAULT true,
+    "frequency" "Frequency" NOT NULL,
+    "rate" DOUBLE PRECISION DEFAULT 0,
+    "calculationBase" "FeeCalculationBase" NOT NULL DEFAULT 'PER_HOUSEHOLD',
+    "anchorDay" INTEGER,
+    "anchorMonth" INTEGER,
+    "status" "FeeStatus" NOT NULL DEFAULT 'ACTIVE',
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Repeatfee_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -103,6 +126,7 @@ CREATE TABLE "FeeAssignment" (
     "feeId" INTEGER NOT NULL,
     "householdId" INTEGER NOT NULL,
     "amountDue" DOUBLE PRECISION NOT NULL,
+    "startDate" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "dueDate" TIMESTAMP(3) NOT NULL,
     "isPaid" BOOLEAN NOT NULL DEFAULT false,
 
@@ -113,7 +137,7 @@ CREATE TABLE "FeeAssignment" (
 CREATE TABLE "Payment" (
     "id" SERIAL NOT NULL,
     "feeAssignmentId" INTEGER NOT NULL,
-    "amountPaid" DOUBLE PRECISION NOT NULL,
+    "amountPaid" DOUBLE PRECISION,
     "imageUrl" TEXT,
     "imagePath" TEXT,
     "status" "InformationStatus" NOT NULL DEFAULT 'PENDING',
@@ -164,13 +188,13 @@ CREATE TABLE "ResidentChanges" (
     "id" SERIAL NOT NULL,
     "residentId" INTEGER NOT NULL,
     "action" "Actions" NOT NULL,
-    "oldData" JSONB,
-    "newData" JSONB,
     "submitUserId" INTEGER NOT NULL,
     "submitAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updateReason" TEXT,
     "reviewAdminId" INTEGER,
     "reviewAt" TIMESTAMP(3),
     "rejectReason" TEXT,
+    "informationStatus" "InformationStatus" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "ResidentChanges_pkey" PRIMARY KEY ("id")
 );
@@ -180,12 +204,13 @@ CREATE TABLE "HouseholdChanges" (
     "id" SERIAL NOT NULL,
     "householdId" INTEGER NOT NULL,
     "action" "Actions" NOT NULL,
-    "oldData" JSONB,
-    "newData" JSONB,
     "submitUserId" INTEGER NOT NULL,
     "submitAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updateReason" TEXT,
     "reviewAdminId" INTEGER,
     "reviewAt" TIMESTAMP(3),
+    "rejectReason" TEXT,
+    "informationStatus" "InformationStatus" NOT NULL DEFAULT 'PENDING',
 
     CONSTRAINT "HouseholdChanges_pkey" PRIMARY KEY ("id")
 );
@@ -272,7 +297,7 @@ ALTER TABLE "ResidentChanges" ADD CONSTRAINT "ResidentChanges_submitUserId_fkey"
 ALTER TABLE "ResidentChanges" ADD CONSTRAINT "ResidentChanges_reviewAdminId_fkey" FOREIGN KEY ("reviewAdminId") REFERENCES "Users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "HouseholdChanges" ADD CONSTRAINT "HouseholdChanges_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "Resident"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "HouseholdChanges" ADD CONSTRAINT "HouseholdChanges_householdId_fkey" FOREIGN KEY ("householdId") REFERENCES "HouseHolds"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "HouseholdChanges" ADD CONSTRAINT "HouseholdChanges_submitUserId_fkey" FOREIGN KEY ("submitUserId") REFERENCES "Users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

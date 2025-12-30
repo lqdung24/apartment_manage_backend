@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE "Fee" ALTER COLUMN "calculationBase" SET DEFAULT 'PER_HOUSEHOLD',
-ALTER COLUMN "rate" SET DEFAULT 0;

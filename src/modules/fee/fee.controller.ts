@@ -76,6 +76,7 @@ export class FeeController {
     });
   }
 
+
   @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get(':id/:householdid/payment')
   householdPayment(
@@ -123,6 +124,7 @@ export class FeeController {
     });
   }
 
+
   @Roles ('ADMIN', Role.ACCOUNTANT)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
@@ -141,4 +143,9 @@ export class FeeController {
     return this.feeService.remove(Number(id));
   }
 
+  @Roles ('ADMIN', Role.ACCOUNTANT)
+  @Post(':id/restart')
+  restartFee(@Param('id', ParseIntPipe) id: number) {
+    return this.feeService.restartFee(id);
+  }
 }

@@ -2,7 +2,15 @@ import {BadRequestException, ConflictException, Injectable, NotFoundException} f
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { CreateFeeAssignmentDto } from './dto/create-assignment.dto';
 import { CreateFeeDto } from './dto/create-fee.dto';
-import {Fee, FeeCalculationBase, Frequency, HouseHolds, HouseHoldStatus, Prisma, ResidenceStatus} from '@prisma/client';
+import {
+  Fee,
+  FeeCalculationBase,
+  FeeStatus,
+  Frequency,
+  HouseHoldStatus,
+  Prisma,
+  ResidenceStatus
+} from '@prisma/client';
 import {CreateAndAssignFeeDto} from "./dto/create-and-assign-fee.dto";
 import * as XLSX from 'xlsx';
 
@@ -71,8 +79,9 @@ export class FeeService {
   }
 
   async deleteRepeatFee(id: number){
-    return this.prisma.repeatfee.delete({
-      where: {id}
+    return this.prisma.repeatfee.update({
+      where: {id},
+      data: {status: FeeStatus.STOPPED},
     })
   }
   //ok
@@ -87,6 +96,15 @@ export class FeeService {
       }
     });
     return this.assignFeeV2(fee, dueDate)
+  }
+
+  async restartFee(id: number){
+    return this.prisma.repeatfee.update({
+      where: {id},
+      data: {
+        status: FeeStatus.ACTIVE
+      }
+    })
   }
 
   async createFeeRepeat(dto: CreateFeeDto) {

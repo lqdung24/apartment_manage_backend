@@ -1,7 +1,7 @@
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserRoleDto } from './dto/update-user-role.dto';
-import { Role } from '@prisma/client';
+import { Role, State } from '@prisma/client';
 import { ApproveHouseholdChangeDto } from "./ApproveHouseholdChange";
 import { UpdateAccountDto } from "./dto/update-account";
 export declare class UserController {
@@ -32,7 +32,7 @@ export declare class UserController {
         id: number;
     }>;
     createAccounts(num: number): Promise<import("@prisma/client").Prisma.BatchPayload>;
-    getUsers(page?: number, limit?: number, search?: string): Promise<{
+    getUsers(page?: number, limit?: number, search?: string, state?: State): Promise<{
         data: {
             items: {
                 username: string;

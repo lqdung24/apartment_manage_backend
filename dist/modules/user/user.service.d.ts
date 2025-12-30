@@ -1,6 +1,6 @@
 import { CreateUserDto } from './dto/create-user.dto';
 import { PrismaService } from "../../shared/prisma/prisma.service";
-import { InformationStatus, Prisma, Role } from "@prisma/client";
+import { InformationStatus, Prisma, Role, State } from "@prisma/client";
 import { UpdateUserRoleDto } from "./dto/update-user-role.dto";
 import { MailService } from "../../common/mail/mail.service";
 import { UpdateAccountDto } from "./dto/update-account";
@@ -57,7 +57,7 @@ export declare class UserService {
         id: number;
     }>;
     createAccounts(num: number): Promise<Prisma.BatchPayload>;
-    getUsers(page?: number, limit?: number, search?: string): Promise<{
+    getUsers(page?: number, limit?: number, search?: string, state?: State): Promise<{
         data: {
             items: {
                 username: string;

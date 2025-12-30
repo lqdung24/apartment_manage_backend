@@ -270,14 +270,38 @@ export class RegistrationService{
     })
   }
   async paginateTempResident(options: {
-    status: InformationStatus
+    status: InformationStatus;
     page: number;
     limit: number;
-    sortBy: string; // vd: "submittedAt" hoặc "resident.fullname"
+    sortBy: string;
     order: 'asc' | 'desc';
+    keyword?: string;
   }) {
-    const {status, page, limit, sortBy, order } = options;
+    const { status, page, limit, sortBy, order, keyword } = options;
     const skip = (page - 1) * limit;
+
+    const where: any = {
+      informationStatus: status,
+    };
+
+    if (keyword) {
+      where.resident = {
+        OR: [
+          {
+            fullname: {
+              contains: keyword,
+              mode: 'insensitive', // không phân biệt hoa thường
+            },
+          },
+          {
+            nationalId: {
+              contains: keyword,
+            },
+          },
+        ],
+      };
+    }
+
 
     // ---- Parse sortBy để Prisma hiểu ----
     let orderBy: any = {};
@@ -300,9 +324,7 @@ export class RegistrationService{
     return this.prisma.$transaction(async (tx) => {
       const [data, total] = await Promise.all([
         tx.temporaryResident.findMany({
-          where: {
-            informationStatus: status
-          },
+          where,
           skip,
           take: limit,
           select: {
@@ -324,11 +346,13 @@ export class RegistrationService{
       ]);
 
       return {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-        data,
+        data: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+          items: data,
+        },
       };
     });
   }
@@ -370,9 +394,11 @@ export class RegistrationService{
     limit: number;
     sortBy: string; // vd: "submittedAt" hoặc "resident.fullname"
     order: 'asc' | 'desc';
+    keyword?: string;
   }) {
-    const {status, page, limit, sortBy, order } = options;
+    const {status, page, limit, sortBy, order, keyword } = options;
     const skip = (page - 1) * limit;
+
     let orderBy: any = {};
     if (sortBy.includes(".")) {
       const [relation, field] = sortBy.split(".");
@@ -387,12 +413,32 @@ export class RegistrationService{
       };
     }
 
+    const where: any = {
+      informationStatus: status,
+    };
+
+    if (keyword) {
+      where.resident = {
+        OR: [
+          {
+            fullname: {
+              contains: keyword,
+              mode: 'insensitive', // không phân biệt hoa thường
+            },
+          },
+          {
+            nationalId: {
+              contains: keyword,
+            },
+          },
+        ],
+      };
+    }
+
     return this.prisma.$transaction(async (tx) => {
       const [data, total] = await Promise.all([
         tx.temporaryAbsence.findMany({
-          where: {
-            informationStatus: status
-          },
+          where,
           skip,
           take: limit,
           select: {

@@ -29,8 +29,8 @@ export class FeeCronService {
     }
   }
 
-  @Cron('0 0 0 * * *', {
-    timeZone: 'Europe/Paris',
+  @Cron('0 0 * * *', {
+    timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleDailyJob() {
     this.logger.log('Run daily job at 00:00');
@@ -43,7 +43,7 @@ export class FeeCronService {
     const monthlyFees = await this.prisma.repeatfee.findMany({
       where: {
         frequency: Frequency.MONTHLY,
-        //anchorDay: day,
+        anchorDay: day,
         status: FeeStatus.ACTIVE
       }
     });
@@ -129,7 +129,7 @@ export class FeeCronService {
   }
 
   @Cron('0 0 * * *', {
-    timeZone: 'Europe/Paris',
+    timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleYearlyFee() {
     const today = new Date();

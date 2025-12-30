@@ -96,9 +96,9 @@ let UserService = class UserService {
             data: users,
         });
     }
-    async getUsers(page = 1, limit = 10, search) {
-        const where = search && search.trim().length > 0
-            ? {
+    async getUsers(page = 1, limit = 10, search, state) {
+        const where = {
+            ...(search && search.trim().length > 0 && {
                 OR: [
                     {
                         email: {
@@ -119,8 +119,11 @@ let UserService = class UserService {
                         },
                     },
                 ],
-            }
-            : undefined;
+            }),
+            ...(state && {
+                state,
+            }),
+        };
         const total = await this.prisma.users.count({ where });
         const totalPages = Math.ceil(total / limit);
         const currentPage = Math.min(page, totalPages || 1);

@@ -86,24 +86,25 @@ export class RegistrationController{
       .updateTempAbsentRegistraion(dto, Number(registrationId), req.user.id);
   }
 
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
-  @Roles('ADMIN')
   @Get('admin/tem-resident')
   async getTempResidents(
     @Query('status') status: InformationStatus,
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('sortBy') sortBy: string,
-    @Query('order') order: string
+    @Query('order') order: string,
+    @Query('keyword') keyword?: string,
   ) {
     return this.registrationService.paginateTempResident({
       status,
       page: Number(page) || 1,
       limit: Number(limit) || 10,
       sortBy: sortBy || 'submittedAt',
-      order: order === 'asc' ? 'asc' : 'desc'
+      order: order === 'asc' ? 'asc' : 'desc',
+      keyword,
     });
   }
+
 
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @Roles('ADMIN')
@@ -131,14 +132,16 @@ export class RegistrationController{
     @Query('page') page: string,
     @Query('limit') limit: string,
     @Query('sortBy') sortBy: string,
-    @Query('order') order: string
+    @Query('order') order: string,
+    @Query('keyword') keyword?: string,
   ) {
     return this.registrationService.paginateTempAbsence({
       status,
       page: Number(page) || 1,
       limit: Number(limit) || 10,
       sortBy: sortBy || 'submittedAt',
-      order: order === 'asc' ? 'asc' : 'desc'
+      order: order === 'asc' ? 'asc' : 'desc',
+      keyword,
     });
   }
   @UseGuards(AuthGuard('jwt'), RolesGuard)
