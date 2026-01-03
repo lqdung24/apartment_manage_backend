@@ -1,15 +1,29 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { CatsController } from './cats/cats.controller';
-import { AdminController } from './admin/admin.controller';
-import { UserModule } from './user/user.module';
-import { PrismaModule } from './database/prisma.module';
-import { DatabaseModule } from './database/database.module';
+import {MiddlewareConsumer, Module, NestModule} from '@nestjs/common';
+import { PrismaModule } from './shared/prisma/prisma.module';
+import {UserModule} from "./modules/user/user.module";
+import {LoggerMiddleware} from "./common/middleware/logger.middleware";
+import {AuthModule} from "./modules/auth/auth.module";
+import { ConfigModule } from '@nestjs/config';
+import {HouseHoldModule} from "./modules/house-hold/house-hold.module";
+import { AdminModule } from './modules/admin/admin.module';
+import { FeeModule } from './modules/fee/fee.module';
+import { PaymentModule } from './modules/payment/payment.module';
+import {RegistrationModule} from "./modules/registration/registration.module";
+import {ScheduleModule} from "@nestjs/schedule";
 
 @Module({
-  controllers: [AppController, CatsController, AdminController],
-  providers: [AppService],
-  imports: [UserModule, PrismaModule, DatabaseModule],
+  imports: [PrismaModule, UserModule, AuthModule,
+    ConfigModule.forRoot({ isGlobal: true, }),
+    HouseHoldModule,
+    AdminModule,
+    FeeModule,
+    PaymentModule,
+    RegistrationModule,
+    ScheduleModule.forRoot(),
+  ],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
