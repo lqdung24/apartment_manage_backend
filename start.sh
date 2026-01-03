@@ -1,3 +1,5 @@
-#npx prisma migrate reset
+# run these code in terminal
+# if havent install yarn yet
+#npm install -g yarn
 
-npx prisma generate
+yarn install
