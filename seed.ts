@@ -211,7 +211,7 @@ async function main() {
       });
     }
   }
-  console.log('✅ Seed xong 40 user + hộ gia đình demo');
+  console.log('Seed xong 40 user + hộ gia đình demo');
 }
 
 main()
