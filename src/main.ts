@@ -13,9 +13,14 @@ async function bootstrap() {
   });
 
   app.enableCors({
-    origin: 'http://localhost:3030',
+    origin: [
+      process.env.LOCAL_FRONTEND,
+      process.env.PUBLIC_FRONTEND,
+    ],
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
     credentials: true,
   });
+
   // kich hoat adapter
  app.useWebSocketAdapter(new IoAdapter(app));
 
