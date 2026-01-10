@@ -1,4 +1,4 @@
-import {BadRequestException, ForbiddenException, Injectable, UseGuards} from '@nestjs/common';
+import {BadRequestException, ConflictException, ForbiddenException, Injectable, UseGuards} from '@nestjs/common';
 import {PrismaService} from "../../shared/prisma/prisma.service";
 import {CreateResidentDto} from "./dto/create-resident.dto";
 import {Actions, InformationStatus, RelationshipToHead, ResidenceStatus} from "@prisma/client";
@@ -143,13 +143,34 @@ export class ResidentService {
     })
   }
 
-  async findResidentByNationalId(nationalId: string){
-    return this.prisma.resident.findFirstOrThrow({
+  async findResidentByNationalId(nationalId: string) {
+    const record = await this.prisma.resident.findFirstOrThrow({
       where: {
-        nationalId: nationalId
-      }
-    })
+        nationalId,
+      },
+    });
+
+    if (record.residentStatus === ResidenceStatus.NORMAL) {
+      throw new ConflictException(
+        "This resident already has permanent residence registration."
+      );
+    }
+
+    if (record.residentStatus === ResidenceStatus.TEMP_RESIDENT) {
+      throw new ConflictException(
+        "This resident is already registered as a temporary resident."
+      );
+    }
+
+    if (record.residentStatus === ResidenceStatus.TEMP_ABSENT) {
+      throw new ConflictException(
+        "This resident is currently registered as temporarily absent."
+      );
+    }
+
+    return record;
   }
+
   async getResidentInHouseholdByStatus(householdId: number, status: ResidenceStatus[]){
     return this.prisma.resident.findMany({
       where: {
