@@ -55,7 +55,7 @@ export class FeeCronService {
       monthlyFees.map((rf) =>
         this.prisma.fee.create({
           data: {
-            name: `${rf.name}, tháng ${month}, phut: ${today.getMinutes()}, ${today.getFullYear()}`,
+            name: `${rf.name}, tháng ${month}, ${today.getFullYear()}`,
             rate: rf.rate,
             isMandatory: rf.isMandatory,
             anchorDay: rf.anchorDay,
