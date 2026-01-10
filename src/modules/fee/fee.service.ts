@@ -1,4 +1,10 @@
-import {BadRequestException, ConflictException, Injectable, NotFoundException} from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException
+} from '@nestjs/common';
 import { PrismaService } from "../../shared/prisma/prisma.service";
 import { CreateFeeAssignmentDto } from './dto/create-assignment.dto';
 import { CreateFeeDto } from './dto/create-fee.dto';
@@ -166,86 +172,144 @@ export class FeeService {
     return this.prisma.feeAssignment.createMany({ data });
   }
 
-  async createFeeFromExcel(file: Express.Multer.File, dto: CreateAndAssignFeeDto) {
-    const {dueDate, ...d} = dto
-    const fee = await this.prisma.fee.create({
-      data: {
-        ...d,
+  async createFeeFromExcel(
+    file: Express.Multer.File,
+    dto: CreateAndAssignFeeDto,
+  ) {
+    return this.prisma.$transaction(async (tx) => {
+      const { dueDate, frequency, ...feeData } = dto;
+
+      // 1️⃣ Tạo khoản phí
+      const fee = await tx.fee.create({
+        data: feeData,
+      });
+      console.log('[IMPORT] Fee created:', fee.id);
+
+      // 2️⃣ Đọc file Excel
+      const workbook = XLSX.read(file.buffer);
+      const sheetName = workbook.SheetNames[0];
+
+      if (!sheetName) {
+        throw new BadRequestException('File Excel không có sheet nào');
       }
-    });
 
-    const workbook = XLSX.read(file.buffer);
-    const sheet = workbook.Sheets[workbook.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
+      const sheet = workbook.Sheets[sheetName];
 
-    const normalizeCCCD = (v: string | number | null | undefined) =>
-      String(v ?? '')
-        .trim()
-        .replace(/\s+/g, '');
+      // 3️⃣ Lấy header
+      const headerRow = XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        range: 0,
+      })[0] as any[];
 
-    // @ts-ignore
-    const data = rows.map((r) => ({
-      cccd: normalizeCCCD(r.cccd),
-      amount: Number(r.so_tien),
-    }));
+      if (!headerRow || headerRow.length === 0) {
+        throw new BadRequestException('File Excel không có dòng tiêu đề');
+      }
 
-    const heads = await this.prisma.houseHolds.findMany({
-      where: {
-        status: HouseHoldStatus.ACTIVE,
-      },
-      select: {
-        id: true,
-        head: {
-          select: {
-            nationalId: true,
+      const normalizeHeader = (v: any) =>
+        String(v ?? '').trim().toLowerCase().replace(/\s+/g, '_');
+
+      const headers = headerRow.map(normalizeHeader);
+
+      if (!headers.includes('cccd')) {
+        throw new BadRequestException('File Excel thiếu cột cccd');
+      }
+      if (!headers.includes('so_tien')) {
+        throw new BadRequestException('File Excel thiếu cột so_tien');
+      }
+
+      // 4️⃣ Parse + validate dữ liệu
+      const rows = XLSX.utils.sheet_to_json<ExcelRow>(sheet);
+
+      const normalizeCCCD = (v: string | number | null | undefined) =>
+        String(v ?? '').trim().replace(/\s+/g, '');
+
+      const parsedData: { cccd: string; amount: number; row: number }[] = [];
+
+      rows.forEach((r, index) => {
+        const rowNumber = index + 2;
+
+        if (!r.cccd || !r.so_tien) {
+          throw new BadRequestException(
+            `Dòng ${rowNumber}: thiếu CCCD hoặc số tiền`,
+          );
+        }
+
+        const cccd = normalizeCCCD(r.cccd);
+        const amount = Number(r.so_tien);
+
+        if (!cccd) {
+          throw new BadRequestException(`Dòng ${rowNumber}: CCCD không hợp lệ`);
+        }
+
+        if (!Number.isFinite(amount) || amount <= 0) {
+          throw new BadRequestException(
+            `Dòng ${rowNumber}: Số tiền không hợp lệ (>0)`,
+          );
+        }
+
+        parsedData.push({ cccd, amount, row: rowNumber });
+      });
+
+      console.log(
+        `[IMPORT] Số dòng hợp lệ: ${parsedData.length} / ${rows.length}`,
+      );
+
+      // 5️⃣ Lấy danh sách chủ hộ
+      const heads = await tx.houseHolds.findMany({
+        where: { status: HouseHoldStatus.ACTIVE },
+        select: {
+          id: true,
+          head: {
+            select: { nationalId: true },
           },
         },
-      },
-    });
-
-// 👇 normalize CCCD trong DB
-    const headMap = new Map(
-      heads.map((h) => [
-        normalizeCCCD(h.head.nationalId),
-        h.id,
-      ]),
-    );
-
-    const errors: ImportError[] = [];
-    const createData: CreateFeeAssignmentInput[] = [];
-
-    for (const item of data) {
-      const householdId = headMap.get(item.cccd);
-
-      if (!householdId) {
-        errors.push({
-          cccd: item.cccd,
-          reason: 'Không tìm thấy chủ hộ',
-        });
-        continue;
-      }
-
-      createData.push({
-        householdId,
-        feeId: fee.id,
-        amountDue: item.amount,
-        dueDate: new Date(dto.dueDate),
       });
-    }
 
-// // 👇 debug cực nhanh
-//     console.log('createData:', createData);
-//     console.log('rows:', rows.length);
-//     console.log('parsed data:', data);
-//     console.log('heads:', heads.length);
-//     console.log('createData:', createData);
+      const headMap = new Map(
+        heads.map((h) => [
+          normalizeCCCD(h.head.nationalId),
+          h.id,
+        ]),
+      );
 
+      // 6️⃣ Ghép dữ liệu tạo feeAssignment
+      const createData: CreateFeeAssignmentInput[] = [];
 
-    return this.prisma.feeAssignment.createMany({
-      data: createData,
-      skipDuplicates: true,
+      parsedData.forEach((item) => {
+        const householdId = headMap.get(item.cccd);
+
+        if (!householdId) {
+          throw new BadRequestException(
+            `Dòng ${item.row}: Không tìm thấy chủ hộ với CCCD ${item.cccd}`,
+          );
+        }
+
+        createData.push({
+          householdId,
+          feeId: fee.id,
+          amountDue: item.amount,
+          dueDate: new Date(dueDate),
+        });
+      });
+
+      // 7️⃣ Tạo feeAssignment
+      const result = await tx.feeAssignment.createMany({
+        data: createData,
+        skipDuplicates: true,
+      });
+
+      console.log('[IMPORT] Fee assignments created:', result.count);
+
+      return {
+        feeId: fee.id,
+        tongDong: rows.length,
+        soDongThanhCong: result.count,
+        soDongLoi: rows.length - result.count,
+      };
     });
   }
+
+
 
   //ok
   async assignFee(dto: CreateFeeAssignmentDto) {
@@ -543,6 +607,5 @@ export class FeeService {
       include: { fee: true }
     });
   }
-
 
 }
