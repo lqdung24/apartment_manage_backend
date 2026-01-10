@@ -4,10 +4,11 @@ export interface ExcelRow {
   so_tien: number;
 }
 
-export interface ImportError {
+export type ImportError = {
+  row?: number;
   cccd: string;
   reason: string;
-}
+};
 
 export interface CreateFeeAssignmentInput {
   householdId: number;
