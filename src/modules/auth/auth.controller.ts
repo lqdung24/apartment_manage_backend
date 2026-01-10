@@ -16,19 +16,26 @@ import { AuthGuard } from '@nestjs/passport';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  private getCookieOptions() {
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    return {
+      httpOnly: true,
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
+      sameSite: isProduction ? 'none' : 'lax',
+      secure: isProduction, 
+      
+    } as const; 
+  }
+
   // ---------------- SIGN UP ----------------
   @Post('signup')
   async signup(@Body() dto: SignUpDto, @Res({ passthrough: true }) res: Response) {
     const { user, accessToken, refreshToken } = await this.authService.signup(dto);
 
     // Gắn refresh token vào cookie
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false, // để test với Postman (khi deploy nên set true)
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 ngày
-    });
+    res.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
     // Trả về user + access token
     return { user, accessToken };
@@ -39,13 +46,7 @@ export class AuthController {
   async signin(@Body() dto: SignInDto, @Res({ passthrough: true }) res: Response) {
     const { user, accessToken, refreshToken } = await this.authService.signin(dto);
 
-    res.cookie('refreshToken', refreshToken, {
-      httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
-      path: '/',
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
+   res.cookie('refreshToken', refreshToken, this.getCookieOptions());
 
     return { user, accessToken };
   }

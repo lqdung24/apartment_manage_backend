@@ -7,8 +7,7 @@ import {Fee, FeeCalculationBase, FeeStatus, Frequency, HouseHoldStatus, Prisma, 
 export class FeeCronService {
   private readonly logger = new Logger(FeeCronService.name);
 
-  constructor(private prisma: PrismaService) {
-  }
+  constructor(private prisma: PrismaService) {}
 
   async calculateAmount(fee: Fee, numCars, numMotorbike, numPeople): Promise<number> {
     if (!fee.rate) return 0;
