@@ -72,11 +72,11 @@ export class RegistrationCronService {
     });
   }
 
-  @Cron('*/5 * * * *', {
+  @Cron('35 22 * * *', {
     timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleTempAbsentJob() {
-    this.logger.log('Run daily job at 22:30');
+    this.logger.log('Run daily job at 22:35');
     return this.prisma.$transaction(async (tx) => {
       // 1. Lấy danh sách temporaryResident đã hết hạn
       const tempResidents = await tx.temporaryAbsence.findMany({
