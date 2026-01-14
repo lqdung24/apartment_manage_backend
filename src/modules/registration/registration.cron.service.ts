@@ -12,11 +12,11 @@ export class RegistrationCronService {
 
   constructor(private prisma: PrismaService) {}
 
-  @Cron('10 0 * * *', {
+  @Cron('30 22 * * *', {
     timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleTempResidentAndTempAbsentJob() {
-    this.logger.log('Run daily job at 00:10');
+    this.logger.log('Run daily job at 22:30');
     return this.prisma.$transaction(async (tx) => {
       // 1. Lấy danh sách temporaryResident đã hết hạn
       const tempResidents = await tx.temporaryResident.findMany({
@@ -72,11 +72,11 @@ export class RegistrationCronService {
     });
   }
 
-  @Cron('0 1 * * *', {
+  @Cron('*/5 * * * *', {
     timeZone: 'Asia/Ho_Chi_Minh',
   })
   async handleTempAbsentJob() {
-    this.logger.log('Run daily job at 01:00');
+    this.logger.log('Run daily job at 22:30');
     return this.prisma.$transaction(async (tx) => {
       // 1. Lấy danh sách temporaryResident đã hết hạn
       const tempResidents = await tx.temporaryAbsence.findMany({
@@ -101,7 +101,7 @@ export class RegistrationCronService {
       const recordIds   = tempResidents.map(tr => tr.id);
 
       // 3. Update temporaryResident -> ENDED
-      const tempResult = await tx.temporaryResident.updateMany({
+      const tempResult = await tx.temporaryAbsence.updateMany({
         where: {
           id: {
             in: recordIds,
