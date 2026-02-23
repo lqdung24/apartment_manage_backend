@@ -1,16 +1,9 @@
 ## Visuals
-<div align="center">
-<table>
-<tr>
-<td min-width="800px"><img src="img.png" width="400" /></td>
-<td min-width="800px"><img src="img_1.png" width="400" /></td>
-<td min-width="800px"><img src="img_2.png" width="400" /></td>
-<td min-width="800px"><img src="img_3.png" width="400" /></td>
-<td min-width="800px"><img src="img_4.png" width="400" /></td>
-<td min-width="800px"><img src="img_5.png" width="400" /></td>
-</tr>
-</table>
-</div>
+![demo gif](web-demo.webp)
+
+## Description
+
+[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
 
 ## Project structure
 
