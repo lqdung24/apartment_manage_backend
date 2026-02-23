@@ -1,19 +1,21 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Visuals
+<div align="center">
+<table style="border-collapse: collapse; border: none;">
+<tr>
+<td style="padding: 10px;">
+<div style="overflow-x: auto; white-space: nowrap; width: 800px; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
+<img src="img.png" height="250" style="margin-right: 10px;" />
+<img src="img_1.png" height="250" style="margin-right: 10px;" />
+<img src="img_2.png" height="250" style="margin-right: 10px;" />
+<img src="img_3.png" height="250" style="margin-right: 10px;" />
+<img src="img_4.png" height="250" style="margin-right: 10px;" />
+<img src="img_5.png" height="250" />
+</div>
+</td>
+</tr>
+</table>
+<p align="center"><i>(Cuộn sang phải để xem thêm ảnh)</i></p>
+</div>
 
 ## Project structure
 
