@@ -1,20 +1,15 @@
 ## Visuals
 <div align="center">
-<table style="border-collapse: collapse; border: none;">
+<table>
 <tr>
-<td style="padding: 10px;">
-<div style="overflow-x: auto; white-space: nowrap; width: 800px; border: 1px solid #ddd; border-radius: 8px; padding: 10px;">
-<img src="img.png" height="250" style="margin-right: 10px;" />
-<img src="img_1.png" height="250" style="margin-right: 10px;" />
-<img src="img_2.png" height="250" style="margin-right: 10px;" />
-<img src="img_3.png" height="250" style="margin-right: 10px;" />
-<img src="img_4.png" height="250" style="margin-right: 10px;" />
-<img src="img_5.png" height="250" />
-</div>
-</td>
+<td min-width="800px"><img src="img.png" width="400" /></td>
+<td min-width="800px"><img src="img_1.png" width="400" /></td>
+<td min-width="800px"><img src="img_2.png" width="400" /></td>
+<td min-width="800px"><img src="img_3.png" width="400" /></td>
+<td min-width="800px"><img src="img_4.png" width="400" /></td>
+<td min-width="800px"><img src="img_5.png" width="400" /></td>
 </tr>
 </table>
-<p align="center"><i>(Cuộn sang phải để xem thêm ảnh)</i></p>
 </div>
 
 ## Project structure
